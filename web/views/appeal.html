@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Ban Appeal - Tomo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/appeal.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="bot-avatar">🌸</div>
+            <h1>Tomo Ban Appeal</h1>
+            <p>Request a review of your ban with Tomo's appeal system</p>
+        </div>
+        
+        <div class="form-container">
+            <div class="info-box">
+                <strong>📋 Before submitting your appeal:</strong>
+                Make sure you have your Case ID and User ID from your ban message. Both are required to verify your identity and prevent fraudulent appeals. Appeals are carefully reviewed by our staff team and typically receive a response within 24-48 hours. Please be honest and respectful in your appeal.
+            </div>
+            
+            <form id="appealForm" action="/appeal" method="POST">
+                <div class="form-group">
+                    <label for="caseId">📋 Case ID <span class="required">*</span></label>
+                    <input type="text" id="caseId" name="caseId" required placeholder="e.g., 0001" value="{{caseId}}" maxlength="10">
+                    <div class="help-text">Find this in your ban notification message</div>
+                    <div class="error-message">Please enter a valid case ID</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="userId">👤 Your Discord User ID <span class="required">*</span></label>
+                    <input type="text" id="userId" name="userId" required placeholder="e.g., 123456789012345678" value="{{userId}}" maxlength="20" pattern="[0-9]{17,19}">
+                    <div class="help-text">🔍 How to find: Settings → Advanced → Developer Mode → Right-click your name → Copy ID</div>
+                    <div class="error-message">Please enter a valid Discord User ID (17-19 digits)</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reason">❓ Why should your ban be lifted? <span class="required">*</span></label>
+                    <textarea id="reason" name="reason" required placeholder="Please explain why you believe your ban should be lifted. Be honest and specific about the situation..." maxlength="1000"></textarea>
+                    <div class="character-count">
+                        <span id="reasonCount">0</span>/1000 characters
+                    </div>
+                    <div class="error-message">Please provide a detailed reason (minimum 50 characters)</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="learned">🎓 What did you learn from this experience? <span class="required">*</span></label>
+                    <textarea id="learned" name="learned" required placeholder="Describe what you've learned and how you'll behave differently in the future..." maxlength="1000"></textarea>
+                    <div class="character-count">
+                        <span id="learnedCount">0</span>/1000 characters
+                    </div>
+                    <div class="error-message">Please explain what you've learned (minimum 30 characters)</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="comments">💬 Additional Comments</label>
+                    <textarea id="comments" name="comments" placeholder="Any additional information you'd like staff to know..." maxlength="500"></textarea>
+                    <div class="character-count">
+                        <span id="commentsCount">0</span>/500 characters
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contact">📧 Alternative Contact Information</label>
+                    <input type="text" id="contact" name="contact" placeholder="Email, Twitter, etc. (optional)" maxlength="100">
+                    <div class="help-text">Optional: How else can staff reach you if needed</div>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    <span>📝 Submit Appeal</span>
+                </button>
+            </form>
+        </div>
+        
+        <div class="footer">
+            Made with 💖 by Tomo • All appeals are reviewed fairly and thoroughly
+        </div>
+    </div>
+
+    <script src="/js/appeal.js"></script>
+</body>
+</html>
