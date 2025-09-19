@@ -128,7 +128,8 @@ module.exports = {
       });
 
       const configModel = new ConfigModel();
-      const appealsChannelId = await configModel.getAppealsChannel();
+      const appealInvite = await configModel.getAppealInvite();
+      const appealsEnabled = await configModel.isAppealsEnabled();
       
       const dmEmbed = new EmbedBuilder()
         .setColor(0xFFB6C1)
@@ -147,26 +148,23 @@ module.exports = {
           }
         )
         .setFooter({ 
-          text: appealsChannelId ? 'Appeal instructions below' : 'Contact staff if you believe this is a mistake',
+          text: (appealsEnabled && appealInvite) ? 'You can appeal this ban using the button below' : 'Contact staff if you believe this is a mistake',
           iconURL: interaction.guild.iconURL() 
         })
         .setTimestamp();
 
       let dmComponents = [];
-      if (appealsChannelId) {
-        const appealUrl = process.env.APPEAL_URL || `http://localhost:${process.env.APPEAL_PORT || 3000}/appeal`;
-        const fullAppealUrl = `${appealUrl}?caseId=${dbAction.caseId}&userId=${targetUser.id}`;
-        
+      if (appealsEnabled && appealInvite) {
         dmEmbed.addFields({
-          name: '📝 How to Appeal',
-          value: `Click the button below to submit an appeal.\n**📋 Your Case ID:** \`${dbAction.caseId}\`\n**🆔 Your User ID:** \`${targetUser.id}\``,
+          name: '⚖️ Appeal This Ban',
+          value: `If you believe this ban was unfair, you can join our appeal server to submit an appeal.\n\n**📋 Your Case ID:** \`${dbAction.caseId}\`\n**🆔 Your User ID:** \`${targetUser.id}\`\n\nMake sure to provide these details when appealing.`,
           inline: false
         });
 
         const appealButton = new ButtonBuilder()
-          .setLabel('🌐 Submit Appeal')
+          .setLabel('⚖️ Join Appeal Server')
           .setStyle(ButtonStyle.Link)
-          .setURL(fullAppealUrl);
+          .setURL(appealInvite);
 
         dmComponents.push(new ActionRowBuilder().addComponents(appealButton));
       }

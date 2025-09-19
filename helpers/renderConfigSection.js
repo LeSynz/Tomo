@@ -19,44 +19,49 @@ module.exports = async function renderConfigSection(section, interaction) {
 
     const staffRolesText = config.staffRoles.length
       ? config.staffRoles.map(r => `<@&${r}>`).join(', ')
-      : 'None set';
+      : '❌ No staff roles configured yet';
 
     const commandsText = Object.keys(config.commands).length
       ? Object.entries(config.commands)
           .map(([cmd, data]) => `\`${cmd}\`: ${data.enabled !== false ? '✅ Enabled' : '❌ Disabled'}`)
           .join('\n')
-      : 'No commands configured';
+      : '❌ No commands discovered yet';
 
     const logsChannelText = config.logsChannelId
       ? `<#${config.logsChannelId}>`
-      : 'Not set';
+      : '❌ No logs channel set';
 
-    const appealsChannelText = config.appealsChannelId
-      ? `<#${config.appealsChannelId}>`
-      : 'Not set';
+    const appealsInviteText = config.appealInvite
+    // turns out trynna hyperlink the url with itself breaks discord markdown
+    // rip `[${config.appealInvite}](${config.appealInvite})` - ya learn something new every day - 00:32
+      ? `[Appeals Server](${config.appealInvite})`
+      : '❌ No appeal server invite set';
 
+    const loggingEnabled = config.loggingEnabled !== false;
+    const appealsEnabled = config.appealsEnabled !== false;
+S
     const container = new ContainerBuilder();
 
     container.addTextDisplayComponents(
-      new TextDisplayBuilder().setContent('## ⚙️ Configuration Panel')
+      new TextDisplayBuilder().setContent('## 🎛️ Tomo Bot Configuration\n*Manage your bot settings and permissions here*')
     );
 
     switch (section) {
       case 'staff':
         container.addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(`**Staff Roles:** ${staffRolesText}`)
+          new TextDisplayBuilder().setContent(`### 👥 Staff Role Management\n*Configure which roles can use moderation commands*\n\n**Current Staff Roles:** ${staffRolesText}`)
         );
 
         if (interaction?.guild) {
           const addRoleButton = new ButtonBuilder()
             .setCustomId('staff_add_role')
-            .setLabel('Add Staff Role')
-            .setStyle(ButtonStyle.Secondary);
+            .setLabel('➕ Add Staff Role')
+            .setStyle(ButtonStyle.Success);
 
           const removeRoleButton = new ButtonBuilder()
             .setCustomId('staff_remove_role')
-            .setLabel('Remove Staff Role')
-            .setStyle(ButtonStyle.Secondary);
+            .setLabel('➖ Remove Staff Role')
+            .setStyle(ButtonStyle.Danger);
 
           container.addActionRowComponents(
             new ActionRowBuilder().addComponents(addRoleButton, removeRoleButton)
@@ -64,7 +69,7 @@ module.exports = async function renderConfigSection(section, interaction) {
 
           const quickAddRoleMenu = new RoleSelectMenuBuilder()
             .setCustomId('staff_add_role_menu')
-            .setPlaceholder('Quick add: Select roles to add as staff')
+            .setPlaceholder('🚀 Quick Add: Select one or more roles to grant staff permissions')
             .setMinValues(1)
             .setMaxValues(10);
 
@@ -77,14 +82,14 @@ module.exports = async function renderConfigSection(section, interaction) {
             const removeOptions = staffRoles
               .map(roleId => {
                 const role = interaction.guild.roles.cache.get(roleId);
-                return role ? { label: role.name, value: role.id } : null;
+                return role ? { label: `Remove: ${role.name}`, value: role.id, description: 'Click to revoke staff permissions from this role' } : null;
               })
               .filter(Boolean);
 
             if (removeOptions.length > 0) {
               const quickRemoveRoleMenu = new StringSelectMenuBuilder()
                 .setCustomId('staff_remove_role_menu')
-                .setPlaceholder('Quick remove: Select roles to remove')
+                .setPlaceholder('🗑️ Quick Remove: Select roles to revoke staff permissions')
                 .setMinValues(1)
                 .setMaxValues(Math.min(removeOptions.length, 25))
                 .addOptions(removeOptions);
@@ -99,71 +104,40 @@ module.exports = async function renderConfigSection(section, interaction) {
 
       case 'commands':
         if (Object.keys(config.commands).length > 0) {
-          const commandsDetailText = Object.entries(config.commands)
-            .map(([cmd, data]) => {
-              const status = data.enabled !== false ? '✅ Enabled' : '❌ Disabled';
-              const accessType = data.isPublic ? '🌍 Public' : '👑 Staff';
-              const whitelist = data.whitelist?.length > 0 
-                ? `\n  📝 Whitelist: ${data.whitelist.map(r => `<@&${r}>`).join(', ')}`
-                : '';
-              const blacklist = data.blacklist?.length > 0 
-                ? `\n  🚫 Blacklist: ${data.blacklist.map(r => `<@&${r}>`).join(', ')}`
-                : '';
-              return `\`${cmd}\`: ${status} | ${accessType}${whitelist}${blacklist}`;
-            })
-            .join('\n\n');
+          const totalCommands = Object.keys(config.commands).length;
+          const enabledCount = Object.values(config.commands).filter(cmd => cmd.enabled !== false).length;
+          const publicCount = Object.values(config.commands).filter(cmd => cmd.isPublic).length;
 
           container.addTextDisplayComponents(
-            new TextDisplayBuilder().setContent(`**Command Settings:**\n${commandsDetailText}`)
+            new TextDisplayBuilder().setContent(`### 🎮 Command Management\n*Control which commands are available and who can use them*\n\n**Command Overview:**\n📊 **Total Commands:** ${totalCommands}\n✅ **Currently Active:** ${enabledCount}\n🌍 **Public Access:** ${publicCount}\n🛡️ **Staff Only:** ${totalCommands - publicCount}`)
           );
 
-          const commandOptions = Object.entries(config.commands).map(([cmd, data]) => ({
-            label: `${cmd} (${data.enabled !== false ? 'Enabled' : 'Disabled'} | ${data.isPublic ? 'Public' : 'Staff'})`,
-            value: cmd,
-            description: `Manage ${cmd} permissions`,
-          }));
+          const manageCommandsButton = new ButtonBuilder()
+            .setCustomId('config_commands_manage')
+            .setLabel('�️ Manage Individual Commands')
+            .setStyle(ButtonStyle.Primary);
 
-          const commandMenu = new StringSelectMenuBuilder()
-            .setCustomId('command_manage_menu')
-            .setPlaceholder('Select a command to manage')
-            .setMinValues(1)
-            .setMaxValues(1)
-            .addOptions(commandOptions);
-
-          container.addActionRowComponents(
-            new ActionRowBuilder().addComponents(commandMenu)
-          );
-
-          const quickToggleMenu = new StringSelectMenuBuilder()
-            .setCustomId('command_toggle_menu')
-            .setPlaceholder('Quick toggle: Select commands to enable/disable')
-            .setMinValues(1)
-            .setMaxValues(Math.min(commandOptions.length, 25))
-            .addOptions(commandOptions.map(opt => ({
-              ...opt,
-              description: `Toggle ${opt.value} on/off`
-            })));
-
-          container.addActionRowComponents(
-            new ActionRowBuilder().addComponents(quickToggleMenu)
-          );
+          const toggleCommandsButton = new ButtonBuilder()
+            .setCustomId('config_commands_toggle')
+            .setLabel('⚡ Quick Enable/Disable Commands')
+            .setStyle(ButtonStyle.Secondary);
 
           const refreshButton = new ButtonBuilder()
             .setCustomId('config_refresh_commands')
-            .setLabel('🔄 Refresh Commands')
+            .setLabel('🔄 Scan for New Commands')
             .setStyle(ButtonStyle.Secondary);
 
           container.addActionRowComponents(
-            new ActionRowBuilder().addComponents(refreshButton)
+            new ActionRowBuilder().addComponents(manageCommandsButton, toggleCommandsButton, refreshButton)
           );
         } else {
           container.addTextDisplayComponents(
-            new TextDisplayBuilder().setContent('**Command Settings:**\nNo commands configured')
+            new TextDisplayBuilder().setContent('### 🎮 Command Management\n*No commands have been discovered yet*\n\n**Getting Started:**\nClick the button below to scan your bot for available commands. This will find all slash commands and set up their permissions.')
           );
 
           const discoverButton = new ButtonBuilder()
             .setCustomId('config_discover_commands')
-            .setLabel('🔍 Discover Commands')
+            .setLabel('🔍 Discover Available Commands')
             .setStyle(ButtonStyle.Primary);
 
           container.addActionRowComponents(
@@ -174,32 +148,58 @@ module.exports = async function renderConfigSection(section, interaction) {
 
       case 'logs':
         container.addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(`**Logs Channel:** ${logsChannelText}`),
-          new TextDisplayBuilder().setContent(`**Appeals Channel:** ${appealsChannelText}`)
+          new TextDisplayBuilder().setContent(`### 📋 Logging Configuration\n*Control your bot's logging and appeals systems*\n\n**🔧 System Status:**\n📝 **Moderation Logging:** ${loggingEnabled ? '✅ Enabled' : '❌ Disabled'}\n⚖️ **User Appeals System:** ${appealsEnabled ? '✅ Enabled' : '❌ Disabled'}\n\n**📍 Configuration:**\n**Moderation Logs:** ${logsChannelText}\n*Where moderation actions (mutes, bans, etc.) are recorded*\n\n**Appeal Server Invite:** ${appealsInviteText}\n*Discord server where users can appeal their punishments*`)
         );
 
-        const setLogsChannelButton = new ButtonBuilder()
-          .setCustomId('set_logs_channel')
-          .setLabel('Set Logs Channel')
-          .setStyle(ButtonStyle.Secondary);
+        // System toggle buttons
+        const toggleLoggingButton = new ButtonBuilder()
+          .setCustomId('toggle_logging_system')
+          .setLabel(loggingEnabled ? '📝 Disable Logging' : '📝 Enable Logging')
+          .setStyle(loggingEnabled ? ButtonStyle.Danger : ButtonStyle.Success);
 
-        const setAppealsChannelButton = new ButtonBuilder()
-          .setCustomId('set_appeals_channel')
-          .setLabel('Set Appeals Channel')
-          .setStyle(ButtonStyle.Secondary);
+        const toggleAppealsButton = new ButtonBuilder()
+          .setCustomId('toggle_appeals_system')
+          .setLabel(appealsEnabled ? '⚖️ Disable Appeals' : '⚖️ Enable Appeals')
+          .setStyle(appealsEnabled ? ButtonStyle.Danger : ButtonStyle.Success);
 
         container.addActionRowComponents(
-          new ActionRowBuilder().addComponents(setLogsChannelButton, setAppealsChannelButton)
+          new ActionRowBuilder().addComponents(toggleLoggingButton, toggleAppealsButton)
         );
+
+        // Channel setup buttons (only show if systems are enabled)
+        if (loggingEnabled || appealsEnabled) {
+          const channelButtons = [];
+          
+          if (loggingEnabled) {
+            channelButtons.push(
+              new ButtonBuilder()
+                .setCustomId('set_logs_channel')
+                .setLabel('📝 Set Moderation Logs Channel')
+                .setStyle(ButtonStyle.Secondary)
+            );
+          }
+          
+          if (appealsEnabled) {
+            channelButtons.push(
+              new ButtonBuilder()
+                .setCustomId('set_appeals_invite')
+                .setLabel('⚖️ Set Appeal Server Invite')
+                .setStyle(ButtonStyle.Secondary)
+            );
+          }
+
+          if (channelButtons.length > 0) {
+            container.addActionRowComponents(
+              new ActionRowBuilder().addComponents(channelButtons)
+            );
+          }
+        }
         break;
 
       case 'general':
       default:
         container.addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(`**Staff Roles:** ${staffRolesText}`),
-          new TextDisplayBuilder().setContent(`**Commands Configured:** ${Object.keys(config.commands).length}`),
-          new TextDisplayBuilder().setContent(`**Logs Channel:** ${logsChannelText}`),
-          new TextDisplayBuilder().setContent(`**Appeals Channel:** ${appealsChannelText}`)
+          new TextDisplayBuilder().setContent(`### 📊 Configuration Overview\n*Quick summary of your bot's current settings*\n\n**👥 Staff Roles:** ${staffRolesText}\n**🎮 Commands Available:** ${Object.keys(config.commands).length} commands discovered\n**📝 Moderation Logging:** ${loggingEnabled ? '✅ Enabled' : '❌ Disabled'} - ${logsChannelText}\n**⚖️ User Appeals:** ${appealsEnabled ? '✅ Enabled' : '❌ Disabled'} - ${appealsInviteText}\n\n*Use the tabs below to configure each section in detail*`)
         );
         break;
     }
@@ -211,10 +211,10 @@ module.exports = async function renderConfigSection(section, interaction) {
     const components = [container];
 
     const buttons = [
-      { id: 'config_general', label: 'General' },
-      { id: 'config_staff', label: 'Staff Roles' },
-      { id: 'config_commands', label: 'Commands' },
-      { id: 'config_logs', label: 'Logs' },
+      { id: 'config_general', label: '📊 Overview', emoji: '📊' },
+      { id: 'config_staff', label: '👥 Staff Roles', emoji: '👥' },
+      { id: 'config_commands', label: '🎮 Commands', emoji: '🎮' },
+      { id: 'config_logs', label: '📋 Logging', emoji: '📋' },
     ];
 
     const buttonRow = new ActionRowBuilder().addComponents(
@@ -235,14 +235,14 @@ module.exports = async function renderConfigSection(section, interaction) {
     
     const container = new ContainerBuilder();
     container.addTextDisplayComponents(
-      new TextDisplayBuilder().setContent('## ⚙️ Configuration Panel'),
-      new TextDisplayBuilder().setContent('❌ Error loading configuration. Please try again.')
+      new TextDisplayBuilder().setContent('## 🎛️ Tomo Bot Configuration\n*Something went wrong while loading your settings*'),
+      new TextDisplayBuilder().setContent('❌ **Error loading configuration.** Please try refreshing or contact support if this persists.')
     );
 
     const buttonRow = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('config_general')
-        .setLabel('Retry')
+        .setLabel('🔄 Try Again')
         .setStyle(ButtonStyle.Primary)
     );
 

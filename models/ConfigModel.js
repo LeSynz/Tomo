@@ -9,7 +9,7 @@ class ConfigModel extends BaseModel {
     async getConfig() {
         let config = await this.findOne({ id: 'global' });
         if (!config) {
-            config = { id: 'global', staffRoles: [], commands: {}, logsChannelId: null, appealsChannelId: null };
+            config = { id: 'global', staffRoles: [], commands: {}, logsChannelId: null, appealInvite: null, loggingEnabled: true, appealsEnabled: true };
             await this.create(config);
         }
 
@@ -18,8 +18,18 @@ class ConfigModel extends BaseModel {
             await this.setConfig(config);
         }
 
-        if (config.appealsChannelId === undefined) {
-            config.appealsChannelId = null;
+        if (config.appealInvite === undefined) {
+            config.appealInvite = null;
+            await this.setConfig(config);
+        }
+
+        if (config.loggingEnabled === undefined) {
+            config.loggingEnabled = true;
+            await this.setConfig(config);
+        }
+
+        if (config.appealsEnabled === undefined) {
+            config.appealsEnabled = true;
             await this.setConfig(config);
         }
 
@@ -50,6 +60,17 @@ class ConfigModel extends BaseModel {
     async getAppealsChannel() {
         const config = await this.getConfig();
         return config.appealsChannelId || null;
+    }
+
+    async setAppealInvite(inviteLink) {
+        const config = await this.getConfig();
+        config.appealInvite = inviteLink;
+        return await this.setConfig(config);
+    }
+
+    async getAppealInvite() {
+        const config = await this.getConfig();
+        return config.appealInvite || null;
     }
 
     canRoleUseCommand(config, roleId, command) {
@@ -349,7 +370,29 @@ class ConfigModel extends BaseModel {
     }
 
     async resetConfig() {
-        return await this.setConfig({ id: 'global', staffRoles: [], commands: {}, logsChannelId: null, appealsChannelId: null });
+        return await this.setConfig({ id: 'global', staffRoles: [], commands: {}, logsChannelId: null, appealInvite: null, loggingEnabled: true, appealsEnabled: true });
+    }
+
+    async setLoggingEnabled(enabled) {
+        const config = await this.getConfig();
+        config.loggingEnabled = enabled;
+        return await this.setConfig(config);
+    }
+
+    async setAppealsEnabled(enabled) {
+        const config = await this.getConfig();
+        config.appealsEnabled = enabled;
+        return await this.setConfig(config);
+    }
+
+    async isLoggingEnabled() {
+        const config = await this.getConfig();
+        return config.loggingEnabled !== false;
+    }
+
+    async isAppealsEnabled() {
+        const config = await this.getConfig();
+        return config.appealsEnabled !== false;
     }
 
     async isUserStaff(userRoles) {

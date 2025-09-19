@@ -1,0 +1,1 @@
+- make `/config` owner only by default unless owner adds a role to the command whitelist!!!

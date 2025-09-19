@@ -1,19 +1,11 @@
 const { ActionRowBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ConfigModel = require('../../models/ConfigModel');
-const logger = require('../../utils/logger');
 
 module.exports = {
-  customId: /^command_toggle_public_(.+)$/,
+  customId: /^command_manage_back_(.+)$/,
   async execute(interaction) {
     try {
-      if (!interaction.guild) {
-        return await interaction.reply({ 
-          content: 'This command can only be used in a server!', 
-          ephemeral: true 
-        });
-      }
-
-      const match = interaction.customId.match(/^command_toggle_public_(.+)$/);
+      const match = interaction.customId.match(/^command_manage_back_(.+)$/);
       if (!match) {
         return await interaction.reply({ 
           content: 'Invalid command identifier!', 
@@ -24,24 +16,14 @@ module.exports = {
       const commandName = match[1];
       const configModel = new ConfigModel();
       const config = await configModel.getConfig();
-      const command = config.commands[commandName];
-
-      if (!command) {
-        return await interaction.reply({ 
-          content: `Command "${commandName}" not found!`, 
-          ephemeral: true 
+      const commandData = config.commands[commandName];
+      
+      if (!commandData) {
+        return await interaction.reply({
+          content: `Command \`${commandName}\` not found! Use **Refresh Commands** to rescan.`,
+          ephemeral: true
         });
       }
-
-      const currentPublicStatus = command.public === true;
-      const newPublicStatus = !currentPublicStatus;
-
-      await configModel.setCommandPublic(commandName, newPublicStatus);
-      
-      const updatedConfig = await configModel.getConfig();
-      const commandData = updatedConfig.commands[commandName];
-
-      logger.info(`User ${interaction.user.tag} toggled public status for command ${commandName}: ${newPublicStatus}`);
 
       const statusInfo = commandData.enabled !== false ? 
         { text: 'Enabled', emoji: '🟢', color: 0x98FB98 } : 
@@ -49,7 +31,7 @@ module.exports = {
 
       const visibilityInfo = commandData.public ? 
         { text: 'Public', emoji: '🌍' } : 
-        { text: 'Private', emoji: '�' };
+        { text: 'Private', emoji: '🔒' };
 
       let description = `**Status:** ${statusInfo.emoji} ${statusInfo.text}\n`;
       description += `**Visibility:** ${visibilityInfo.emoji} ${visibilityInfo.text}\n\n`;
@@ -110,12 +92,12 @@ module.exports = {
       });
 
     } catch (error) {
-      logger.error('Error in command_toggle_public:', error);
+      console.error('Error in command_manage_back:', error);
       
       const embed = new EmbedBuilder()
         .setColor(0xFFB6C1)
         .setTitle('❌ Error')
-        .setDescription('Failed to toggle visibility! Please try again~')
+        .setDescription('Failed to load command details! Please try again~')
         .setFooter({ text: 'Something went wrong! 💔' });
 
       await interaction.update({
@@ -123,5 +105,5 @@ module.exports = {
         components: []
       });
     }
-  },
+  }
 };

@@ -21,6 +21,13 @@ class ModerationLogger {
    */
   async logAction(client, action) {
     try {
+      // Check if logging is enabled
+      const isLoggingEnabled = await this.configModel.isLoggingEnabled();
+      if (!isLoggingEnabled) {
+        logger.info('Moderation logging is disabled, skipping log');
+        return false;
+      }
+
       const logsChannelId = await this.configModel.getLogsChannel();
       
       if (!logsChannelId) {
@@ -172,6 +179,51 @@ class ModerationLogger {
       }
     };
     return await this.logAction(client, action);
+  }
+
+  async logReasonUpdate(client, { caseId, moderator, target, oldReason, newReason, actionType }) {
+    try {
+      const logsChannelId = await this.configModel.getLogsChannel();
+      
+      if (!logsChannelId) {
+        logger.info('No logs channel configured, skipping reason update log');
+        return false;
+      }
+
+      const logsChannel = await client.channels.fetch(logsChannelId).catch(() => null);
+      
+      if (!logsChannel) {
+        logger.warn(`Logs channel ${logsChannelId} not found or inaccessible`);
+        return false;
+      }
+
+      const embed = new EmbedBuilder()
+        .setColor(0xFFB6C1)
+        .setDescription(`📝 **Case Reason Updated** | Case ${caseId}\n👤 **Target:** ${target.tag}\n🔨 **Updated by:** ${moderator.tag}\n⚡ **Action Type:** ${actionType}`)
+        .addFields(
+          {
+            name: '📝 Old Reason',
+            value: `\`${oldReason}\``,
+            inline: false
+          },
+          {
+            name: '✨ New Reason',
+            value: `\`${newReason}\``,
+            inline: false
+          }
+        )
+        .setFooter({ text: `Case ${caseId} • Reason Updated` })
+        .setTimestamp();
+
+      await logsChannel.send({ embeds: [embed] });
+      
+      logger.info(`Logged reason update for case ${caseId} by ${moderator.tag}`);
+      return true;
+
+    } catch (error) {
+      logger.error('Error logging reason update:', error);
+      return false;
+    }
   }
 
   /**
