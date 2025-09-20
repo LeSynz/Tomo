@@ -11,7 +11,7 @@ class PermissionChecker {
     try {
       const userRoles = interaction.member?.roles?.cache?.map(role => role.id) || [];
       
-      const isOwner = false; // interaction.guild?.ownerId === interaction.user.id;
+      const isOwner = interaction.guild?.ownerId === interaction.user.id;
 
       const result = await this.configModel.checkCommandPermission(commandName, userRoles, isOwner);
 
@@ -72,7 +72,7 @@ class PermissionChecker {
   async getPermissionDetails(interaction, commandName) {
     try {
       const userRoles = interaction.member?.roles?.cache?.map(role => role.id) || [];
-      const isOwner = false; // interaction.guild?.ownerId === interaction.user.id; // TEMPORARILY DISABLED FOR TESTING
+      const isOwner = interaction.guild?.ownerId === interaction.user.id;
       const config = await this.configModel.getConfig();
       const command = config.commands?.[commandName];
 

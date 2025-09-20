@@ -255,6 +255,19 @@ class ConfigModel extends BaseModel {
             return { allowed: false, reason: 'Command is disabled' };
         }
 
+        if (commandName === 'config') {
+            if (isOwner) return { allowed: true, reason: 'Server owner' };
+
+            if (command.whitelist?.length > 0) {
+                const hasWhitelistedRole = command.whitelist.some(roleId => userRoles.includes(roleId));
+                if (hasWhitelistedRole) {
+                    return { allowed: true, reason: 'User has whitelisted role for config command' };
+                }
+            }
+
+            return { allowed: false, reason: 'Config command is owner-only (unless whitelisted)' };
+        }
+
         if (isOwner) return { allowed: true, reason: 'Owner bypass' };
 
         if (command.blacklist?.length > 0) {
