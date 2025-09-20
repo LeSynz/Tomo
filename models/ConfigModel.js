@@ -14,6 +14,9 @@ class ConfigModel extends BaseModel {
                 staffRoles: [], 
                 commands: {}, 
                 logsChannelId: null, 
+                messageLogsChannelId: null,
+                messageLoggingEnabled: false,
+                messageLogsBlacklist: [],
                 appealInvite: null, 
                 loggingEnabled: true, 
                 appealsEnabled: true,
@@ -46,6 +49,21 @@ class ConfigModel extends BaseModel {
 
         if (config.appealsEnabled === undefined) {
             config.appealsEnabled = true;
+            await this.setConfig(config);
+        }
+
+        if (config.messageLoggingEnabled === undefined) {
+            config.messageLoggingEnabled = false;
+            await this.setConfig(config);
+        }
+
+        if (config.messageLogsChannelId === undefined) {
+            config.messageLogsChannelId = null;
+            await this.setConfig(config);
+        }
+
+        if (config.messageLogsBlacklist === undefined) {
+            config.messageLogsBlacklist = [];
             await this.setConfig(config);
         }
 

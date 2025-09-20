@@ -31,11 +31,16 @@ module.exports = async function renderConfigSection(section, interaction) {
       ? `<#${config.logsChannelId}>`
       : '❌ No logs channel set';
 
+    const messageLogsChannelText = config.messageLogsChannelId
+      ? `<#${config.messageLogsChannelId}>`
+      : '❌ No message logs channel set';
+
     const appealsInviteText = config.appealInvite
       ? `[Appeals Server](${config.appealInvite})`
       : '❌ No appeal server invite set';
 
     const loggingEnabled = config.loggingEnabled !== false;
+    const messageLoggingEnabled = config.messageLoggingEnabled !== false;
     const appealsEnabled = config.appealsEnabled !== false;
 
     const container = new ContainerBuilder();
@@ -145,14 +150,23 @@ module.exports = async function renderConfigSection(section, interaction) {
         break;
 
       case 'logs':
+        const blacklistedChannelsText = config.messageLogsBlacklist && config.messageLogsBlacklist.length > 0
+          ? config.messageLogsBlacklist.map(id => `<#${id}>`).join(', ')
+          : '❌ No channels blacklisted';
+
         container.addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(`### 📋 Logging Configuration\n*Control your bot's logging and appeals systems*\n\n**🔧 System Status:**\n📝 **Moderation Logging:** ${loggingEnabled ? '✅ Enabled' : '❌ Disabled'}\n⚖️ **User Appeals System:** ${appealsEnabled ? '✅ Enabled' : '❌ Disabled'}\n\n**📍 Configuration:**\n**Moderation Logs:** ${logsChannelText}\n*Where moderation actions (mutes, bans, etc.) are recorded*\n\n**Appeal Server Invite:** ${appealsInviteText}\n*Discord server where users can appeal their punishments*`)
+          new TextDisplayBuilder().setContent(`### 📋 Logging Configuration\n*Control your bot's logging and appeals systems*\n\n**🔧 System Status:**\n📝 **Moderation Logging:** ${loggingEnabled ? '✅ Enabled' : '❌ Disabled'}\n💬 **Message Logging:** ${messageLoggingEnabled ? '✅ Enabled' : '❌ Disabled'}\n⚖️ **User Appeals System:** ${appealsEnabled ? '✅ Enabled' : '❌ Disabled'}\n\n**📍 Configuration:**\n**Moderation Logs:** ${logsChannelText}\n*Where moderation actions (mutes, bans, etc.) are recorded*\n\n**Message Logs:** ${messageLogsChannelText}\n*Where message edits, deletions, and other events are logged*\n\n**Message Logs Blacklist:** ${blacklistedChannelsText}\n*Channels excluded from message logging*\n\n**Appeal Server Invite:** ${appealsInviteText}\n*Discord server where users can appeal their punishments*`)
         );
 
         const toggleLoggingButton = new ButtonBuilder()
           .setCustomId('toggle_logging_system')
-          .setLabel(loggingEnabled ? '📝 Disable Logging' : '📝 Enable Logging')
+          .setLabel(loggingEnabled ? '📝 Disable Moderation Logging' : '📝 Enable Moderation Logging')
           .setStyle(loggingEnabled ? ButtonStyle.Danger : ButtonStyle.Success);
+
+        const toggleMessageLoggingButton = new ButtonBuilder()
+          .setCustomId('toggle_message_logging_system')
+          .setLabel(messageLoggingEnabled ? '💬 Disable Message Logging' : '💬 Enable Message Logging')
+          .setStyle(messageLoggingEnabled ? ButtonStyle.Danger : ButtonStyle.Success);
 
         const toggleAppealsButton = new ButtonBuilder()
           .setCustomId('toggle_appeals_system')
@@ -160,10 +174,10 @@ module.exports = async function renderConfigSection(section, interaction) {
           .setStyle(appealsEnabled ? ButtonStyle.Danger : ButtonStyle.Success);
 
         container.addActionRowComponents(
-          new ActionRowBuilder().addComponents(toggleLoggingButton, toggleAppealsButton)
+          new ActionRowBuilder().addComponents(toggleLoggingButton, toggleMessageLoggingButton, toggleAppealsButton)
         );
 
-        if (loggingEnabled || appealsEnabled) {
+        if (loggingEnabled || appealsEnabled || messageLoggingEnabled) {
           const channelButtons = [];
           
           if (loggingEnabled) {
@@ -171,6 +185,15 @@ module.exports = async function renderConfigSection(section, interaction) {
               new ButtonBuilder()
                 .setCustomId('set_logs_channel')
                 .setLabel('📝 Set Moderation Logs Channel')
+                .setStyle(ButtonStyle.Secondary)
+            );
+          }
+
+          if (messageLoggingEnabled) {
+            channelButtons.push(
+              new ButtonBuilder()
+                .setCustomId('set_message_logs_channel')
+                .setLabel('💬 Set Message Logs Channel')
                 .setStyle(ButtonStyle.Secondary)
             );
           }
@@ -187,6 +210,17 @@ module.exports = async function renderConfigSection(section, interaction) {
           if (channelButtons.length > 0) {
             container.addActionRowComponents(
               new ActionRowBuilder().addComponents(channelButtons)
+            );
+          }
+
+          if (messageLoggingEnabled) {
+            const configMessageLogsButton = new ButtonBuilder()
+              .setCustomId('config_message_logs')
+              .setLabel('⚙️ Configure Message Logging')
+              .setStyle(ButtonStyle.Secondary);
+
+            container.addActionRowComponents(
+              new ActionRowBuilder().addComponents(configMessageLogsButton)
             );
           }
         }
@@ -251,7 +285,7 @@ module.exports = async function renderConfigSection(section, interaction) {
       case 'general':
       default:
         container.addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(`### 📊 Configuration Overview\n*Quick summary of your bot's current settings*\n\n**👥 Staff Roles:** ${staffRolesText}\n**🎮 Commands Available:** ${Object.keys(config.commands).length} commands discovered\n**📝 Moderation Logging:** ${loggingEnabled ? '✅ Enabled' : '❌ Disabled'} - ${logsChannelText}\n**⚖️ User Appeals:** ${appealsEnabled ? '✅ Enabled' : '❌ Disabled'} - ${appealsInviteText}\n\n*Use the tabs below to configure each section in detail*`)
+          new TextDisplayBuilder().setContent(`### 📊 Configuration Overview\n*Quick summary of your bot's current settings*\n\n**👥 Staff Roles:** ${staffRolesText}\n**🎮 Commands Available:** ${Object.keys(config.commands).length} commands discovered\n**📝 Moderation Logging:** ${loggingEnabled ? '✅ Enabled' : '❌ Disabled'} - ${logsChannelText}\n**💬 Message Logging:** ${messageLoggingEnabled ? '✅ Enabled' : '❌ Disabled'} - ${messageLogsChannelText}\n**⚖️ User Appeals:** ${appealsEnabled ? '✅ Enabled' : '❌ Disabled'} - ${appealsInviteText}\n\n*Use the tabs below to configure each section in detail*`)
         );
         break;
     }
