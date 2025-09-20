@@ -41,7 +41,6 @@ module.exports = {
         });
       }
 
-      // Build detailed management interface using v2 components
       const enabledStatus = command.enabled !== false ? '✅ Enabled' : '❌ Disabled';
       const accessType = command.isPublic ? '🌍 Public (Everyone)' : '👑 Staff Only';
       const whitelistText = command.whitelist?.length > 0 
@@ -51,7 +50,6 @@ module.exports = {
         ? command.blacklist.map(r => `<@&${r}>`).join(', ')
         : 'None';
 
-      // Create container with text displays
       const container = new ContainerBuilder();
       
       container.addTextDisplayComponents(
@@ -63,7 +61,6 @@ module.exports = {
         new TextDisplayBuilder().setContent(`*🌍 Public: usable by everyone | 👑 Staff: requires staff roles*\n*Whitelist overrides access type. Blacklist blocks all access.*`)
       );
 
-      // Toggle buttons
       const toggleButton = new ButtonBuilder()
         .setCustomId(`command_toggle_single_${commandName}`)
         .setLabel(command.enabled !== false ? 'Disable' : 'Enable')
@@ -74,7 +71,6 @@ module.exports = {
         .setLabel(command.isPublic ? 'Make Staff Only' : 'Make Public')
         .setStyle(command.isPublic ? ButtonStyle.Secondary : ButtonStyle.Success);
 
-      // Whitelist management
       const addWhitelistButton = new ButtonBuilder()
         .setCustomId(`command_whitelist_add_${commandName}`)
         .setLabel('Add to Whitelist')
@@ -86,7 +82,6 @@ module.exports = {
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(command.whitelist?.length === 0);
 
-      // Blacklist management
       const addBlacklistButton = new ButtonBuilder()
         .setCustomId(`command_blacklist_add_${commandName}`)
         .setLabel('Add to Blacklist')
@@ -98,20 +93,17 @@ module.exports = {
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(command.blacklist?.length === 0);
 
-      // Back button
       const backButton = new ButtonBuilder()
         .setCustomId('config_commands')
         .setLabel('Back to Commands')
         .setStyle(ButtonStyle.Primary);
 
-      // Add action rows to container
       container.addActionRowComponents(
         new ActionRowBuilder().addComponents(toggleButton, publicButton, backButton),
         new ActionRowBuilder().addComponents(addWhitelistButton, removeWhitelistButton),
         new ActionRowBuilder().addComponents(addBlacklistButton, removeBlacklistButton)
       );
 
-      // Add separator
       container.addSeparatorComponents(
         new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
       );
@@ -125,7 +117,6 @@ module.exports = {
     } catch (error) {
       logger.error('Error in command_manage_menu:', error);
       
-      // Fallback minimal interface using V2 components
       const errorContainer = new ContainerBuilder();
       errorContainer.addTextDisplayComponents(
         new TextDisplayBuilder().setContent('## ❌ Error'),

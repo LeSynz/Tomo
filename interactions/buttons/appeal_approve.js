@@ -7,12 +7,10 @@ module.exports = {
   customId: /^appeal_approve_\d+_\d+$/,
   async execute(interaction) {
     try {
-      // Extract case ID and user ID from button custom ID
       const parts = interaction.customId.split('_');
       const caseId = parts[2];
       const userId = parts[3];
 
-      // Check if appeal exists and is still pending
       const appeal = await AppealModel.getAppeal(caseId, userId);
       if (!appeal || appeal.status !== 'pending') {
         const embed = new EmbedBuilder()
@@ -27,14 +25,12 @@ module.exports = {
         });
       }
 
-      // Get the user and unban them
       const guild = interaction.guild;
       
       try {
         await guild.members.unban(userId, `Appeal approved by ${interaction.user.tag}`);
       } catch (unbanError) {
         if (unbanError.code === 10026) {
-          // User is not banned
           const embed = new EmbedBuilder()
             .setColor(0xFFB6C1)
             .setTitle('ℹ️ User Not Banned')
@@ -50,7 +46,6 @@ module.exports = {
         }
       }
 
-      // Log the appeal approval
       await ModerationActionModel.logAction({
         type: 'unban',
         userId: userId,
@@ -58,10 +53,8 @@ module.exports = {
         reason: `Appeal approved for case ${caseId}`
       });
 
-      // Update appeal status
       await AppealModel.updateAppealStatus(caseId, userId, 'approved', interaction.user.id);
 
-      // Try to DM the user about the approval
       try {
         const user = await interaction.client.users.fetch(userId);
         const dmEmbed = new EmbedBuilder()
@@ -83,7 +76,6 @@ module.exports = {
         console.log(`Could not DM user about appeal approval:`, dmError.message);
       }
 
-      // Update the original appeal message
       const approvedEmbed = EmbedBuilder.from(interaction.message.embeds[0])
         .setColor(0x90EE90)
         .setTitle('✅ Ban Appeal - APPROVED')
@@ -95,7 +87,7 @@ module.exports = {
 
       await interaction.update({
         embeds: [approvedEmbed],
-        components: [] // Remove buttons
+        components: []
       });
 
       logger.info(`Appeal approved by ${interaction.user.tag} for case ${caseId}, user ${userId}`);

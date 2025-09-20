@@ -7,10 +7,8 @@ module.exports = {
   customId: /^appeal_history_\d+$/,
   async execute(interaction) {
     try {
-      // Extract user ID from button custom ID
       const userId = interaction.customId.split('_')[2];
 
-      // Get user's case history and appeal history
       const userCases = await ModerationActionModel.getUserCases(userId);
       const appeals = await AppealModel.getAppealHistory(userId);
 
@@ -21,7 +19,6 @@ module.exports = {
           .setDescription('No moderation history found for this user.')
           .setFooter({ text: 'Clean record! ✨' });
 
-        // Still check for appeals even if no cases
         if (appeals && appeals.length > 0) {
           const pendingAppeals = appeals.filter(a => a.status === 'pending').length;
           const approvedAppeals = appeals.filter(a => a.status === 'approved').length;
@@ -40,7 +37,6 @@ module.exports = {
         });
       }
 
-      // Get user information
       let userTag = 'Unknown User';
       try {
         const user = await interaction.client.users.fetch(userId);
@@ -49,18 +45,15 @@ module.exports = {
         console.log('Could not fetch user for case history:', error.message);
       }
 
-      // Sort cases by timestamp (newest first)
       userCases.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-      // Create case history embed
       const historyEmbed = new EmbedBuilder()
         .setColor(0xFFB6C1)
         .setTitle('📋 User History & Appeals')
         .setDescription(`**User:** ${userTag}\n**User ID:** ${userId}\n**Total Cases:** ${userCases.length}`)
         .setTimestamp();
 
-      // Add cases to embed (limit to prevent embed size issues)
-      const maxCases = 5; // Reduced to make room for appeals
+      const maxCases = 5;
       const casesToShow = userCases.slice(0, maxCases);
 
       for (const caseData of casesToShow) {
@@ -84,7 +77,6 @@ module.exports = {
         });
       }
 
-      // Add appeal history
       if (appeals && appeals.length > 0) {
         const maxAppeals = 3;
         const appealsToShow = appeals
@@ -105,7 +97,6 @@ module.exports = {
           });
         }
 
-        // Add appeal statistics
         const pendingAppeals = appeals.filter(a => a.status === 'pending').length;
         const approvedAppeals = appeals.filter(a => a.status === 'approved').length;
         const deniedAppeals = appeals.filter(a => a.status === 'denied').length;

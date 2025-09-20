@@ -7,15 +7,12 @@ module.exports = {
   customId: /^appeal_modal_\d+$/,
   async execute(interaction) {
     try {
-      // Extract case ID from modal custom ID
       const caseId = interaction.customId.split('_')[2];
 
-      // Get form responses
       const whyBan = interaction.fields.getTextInputValue('why_ban');
       const whyAccept = interaction.fields.getTextInputValue('why_accept');
       const additionalComments = interaction.fields.getTextInputValue('additional_comments') || 'None provided';
 
-      // Get appeals channel
       const configModel = new ConfigModel();
       const appealsChannelId = await configModel.getAppealsChannel();
 
@@ -35,7 +32,6 @@ module.exports = {
         });
       }
 
-      // Get case information
       const caseData = await ModerationActionModel.getCase(caseId);
       
       if (!caseData) {
@@ -45,7 +41,6 @@ module.exports = {
         });
       }
 
-      // Create appeal embed
       const appealEmbed = new EmbedBuilder()
         .setColor(0xFFB6C1)
         .setTitle('📝 New Ban Appeal')
@@ -81,7 +76,6 @@ module.exports = {
         .setFooter({ text: 'Appeal submitted' })
         .setTimestamp();
 
-      // Create action buttons for staff
       const actionRow = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
           .setCustomId(`appeal_approve_${caseId}_${interaction.user.id}`)
@@ -97,13 +91,11 @@ module.exports = {
           .setStyle(ButtonStyle.Secondary)
       );
 
-      // Send appeal to appeals channel
       await appealsChannel.send({
         embeds: [appealEmbed],
         components: [actionRow]
       });
 
-      // Confirm to user
       const confirmEmbed = new EmbedBuilder()
         .setColor(0xFFB6C1)
         .setTitle('📝 Appeal Submitted!')

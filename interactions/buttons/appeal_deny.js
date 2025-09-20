@@ -6,12 +6,10 @@ module.exports = {
   customId: /^appeal_deny_\d+_\d+$/,
   async execute(interaction) {
     try {
-      // Extract case ID and user ID from button custom ID
       const parts = interaction.customId.split('_');
       const caseId = parts[2];
       const userId = parts[3];
 
-      // Check if appeal exists and is still pending
       const appeal = await AppealModel.getAppeal(caseId, userId);
       if (!appeal || appeal.status !== 'pending') {
         const embed = new EmbedBuilder()
@@ -26,10 +24,8 @@ module.exports = {
         });
       }
 
-      // Update appeal status
       await AppealModel.updateAppealStatus(caseId, userId, 'denied', interaction.user.id);
 
-      // Try to DM the user about the denial
       try {
         const user = await interaction.client.users.fetch(userId);
         const dmEmbed = new EmbedBuilder()
@@ -56,7 +52,6 @@ module.exports = {
         console.log(`Could not DM user about appeal denial:`, dmError.message);
       }
 
-      // Update the original appeal message
       const deniedEmbed = EmbedBuilder.from(interaction.message.embeds[0])
         .setColor(0xFF6B6B) // Light red
         .setTitle('❌ Ban Appeal - DENIED')
@@ -68,12 +63,11 @@ module.exports = {
 
       await interaction.update({
         embeds: [deniedEmbed],
-        components: [] // Remove buttons
+        components: []
       });
 
       logger.info(`Appeal denied by ${interaction.user.tag} for case ${caseId}, user ${userId}`);
 
-      // Send confirmation to staff member
       const confirmEmbed = new EmbedBuilder()
         .setColor(0xFFB6C1)
         .setTitle('✅ Appeal Denied')

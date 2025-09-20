@@ -33,7 +33,6 @@ module.exports = {
         });
       }
 
-      // Toggle the command state
       const currentState = commandData.enabled !== false;
       const newState = !currentState;
       

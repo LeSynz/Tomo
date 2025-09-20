@@ -13,11 +13,9 @@ module.exports = {
 			
 			const configModel = new ConfigModel();
 			
-			// Auto-discover and register new commands only
 			logger.info(`🔍 Admin ${interaction.user.tag} requested command discovery`);
 			const discoveredCount = await configModel.discoverAndRegisterCommands(interaction.client, false);
 			
-			// Render updated config section
 			const response = await renderConfigSection('commands', interaction.guild.id);
 			
 			const message = discoveredCount > 0 

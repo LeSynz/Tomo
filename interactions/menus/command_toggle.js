@@ -24,11 +24,9 @@ module.exports = {
 
       for (const commandName of interaction.values) {
         try {
-          // Get current command state
           const currentConfig = await configModel.getConfig();
           const currentState = currentConfig.commands[commandName]?.enabled !== false;
           
-          // Toggle the command
           await configModel.setCommandEnabled(commandName, !currentState);
           toggledCommands.push({
             name: commandName,

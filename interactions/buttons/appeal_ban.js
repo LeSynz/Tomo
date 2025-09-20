@@ -5,14 +5,12 @@ module.exports = {
   customId: /^appeal_ban_\d+$/,
   async execute(interaction) {
     try {
-      // Extract case ID from button custom ID
       const caseId = interaction.customId.split('_')[2];
 
       const modal = new ModalBuilder()
         .setCustomId(`appeal_modal_${caseId}`)
         .setTitle('🌸 Ban Appeal Form');
 
-      // Question 1: Why should ban be lifted?
       const whyLiftInput = new TextInputBuilder()
         .setCustomId('why_ban')
         .setLabel('Why did you get banned?')
@@ -21,7 +19,6 @@ module.exports = {
         .setRequired(true)
         .setMaxLength(1000);
 
-      // Question 2: What did you learn?
       const whatLearnedInput = new TextInputBuilder()
         .setCustomId('why_accept')
         .setLabel('Why should your ban be lifted?')
@@ -30,7 +27,6 @@ module.exports = {
         .setRequired(true)
         .setMaxLength(1000);
 
-      // Question 3: Additional comments
       const additionalInput = new TextInputBuilder()
         .setCustomId('additional_comments')
         .setLabel('Additional comments')
@@ -39,7 +35,6 @@ module.exports = {
         .setRequired(true)
         .setMaxLength(1000);
 
-      // Add rows to modal
       modal.addComponents(
         new ActionRowBuilder().addComponents(whyLiftInput),
         new ActionRowBuilder().addComponents(whatLearnedInput),

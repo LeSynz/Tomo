@@ -8,7 +8,6 @@ module.exports = {
       const inviteLink = interaction.fields.getTextInputValue('appeal_invite_input').trim();
       const instructions = interaction.fields.getTextInputValue('appeal_instructions_input')?.trim() || null;
 
-      // Validate invite link format
       const inviteRegex = /^(?:https?:\/\/)?(?:www\.)?(?:discord\.gg\/|discord\.com\/invite\/|discordapp\.com\/invite\/)([a-zA-Z0-9-]+)$/;
       
       if (!inviteRegex.test(inviteLink)) {
@@ -24,7 +23,6 @@ module.exports = {
         });
       }
 
-      // Normalize the invite link
       const match = inviteLink.match(inviteRegex);
       const inviteCode = match[1];
       const normalizedInvite = `https://discord.gg/${inviteCode}`;

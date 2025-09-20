@@ -26,7 +26,6 @@ module.exports = {
         ephemeral: true
       });
 
-      // Update the config interface
       try {
         const updatedInterface = await renderConfigSection('logs', interaction);
         await interaction.editReply({
