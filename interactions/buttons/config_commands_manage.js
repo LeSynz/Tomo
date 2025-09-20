@@ -45,17 +45,17 @@ module.exports = {
       if (totalPages > 1) {
         const navigationButtons = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
-            .setCustomId('commands_page_prev')
+            .setCustomId('manage_page_prev')
             .setLabel('◀️ Previous')
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(true),
           new ButtonBuilder()
-            .setCustomId('commands_page_next')
+            .setCustomId('manage_page_next')
             .setLabel('▶️ Next')
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(totalPages === 1),
           new ButtonBuilder()
-            .setCustomId('commands_search')
+            .setCustomId('manage_search')
             .setLabel('🔍 Search')
             .setStyle(ButtonStyle.Secondary)
         );

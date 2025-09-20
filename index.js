@@ -9,7 +9,6 @@ const { loadModals } = require('./handlers/modalHandler');
 const { loadSelectMenus } = require('./handlers/selectMenuHandler');
 
 const logger = require('./utils/logger');
-const AppealServer = require('./web/appealServer');
 
 const client = new Client({
 	intents: [
@@ -58,14 +57,6 @@ client.once('ready', async () => {
 	console.log(`Bot is ready! Logged in as ${client.user.tag}`);
 	console.log(`Select menus loaded: ${client.selectMenus.size}`);
 	console.log(`Available select menu IDs: ${Array.from(client.selectMenus.keys()).join(', ')}`);
-
-	try {
-		const appealServer = new AppealServer(client);
-		await appealServer.start(process.env.APPEAL_PORT || 3000);
-		logger.info('Appeal server started successfully!');
-	} catch (error) {
-		logger.error('Failed to start appeal server:', error);
-	}
 });
 
 process.on('unhandledRejection', (error) => {

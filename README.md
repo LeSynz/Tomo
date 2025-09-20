@@ -6,9 +6,15 @@ A feature-rich Discord moderation bot with a cute pink aesthetic, built with Dis
 
 ### 🛡️ Moderation System
 - **Ban/Unban**: Advanced ban system with case tracking and appeal integration
+- **Kick System**: User removal with hierarchy checks and case logging
 - **Warning System**: Comprehensive warning management with automated escalation
+- **Channel Management**: Lock/unlock channels with permission management
+- **Slowmode Control**: Rate limiting with smart duration parsing
 - **Automod Integration**: Automatic punishments based on warning thresholds
-- **Case Management**: Automatic case ID generation and logging
+- **Case Management**: Automatic case ID generation and comprehensive logging
+- **Search & Discovery**: Powerful log search with filtering and pagination
+- **Staff Notes**: Private annotation system for user tracking
+- **User Information**: Comprehensive user profiles with moderation history
 - **Moderation Statistics**: Detailed stats for individual moderators and servers
 - **Case History**: Complete moderation logs with searchable history
 - **Role Hierarchy**: Respects Discord's role hierarchy for safety
@@ -138,6 +144,104 @@ Delete a specific warning from a user's history using an interactive menu.
 - Supports up to 25 most recent warnings in menu
 - Comprehensive deletion logging
 
+#### `/kick <user> [reason]`
+Kicks a user from the server with case tracking.
+
+**Parameters:**
+- `user` - The user to kick (required)
+- `reason` - Reason for the kick (optional)
+
+**Features:**
+- Automatic case ID generation
+- DM notification to kicked user
+- Role hierarchy verification
+- Moderation logging
+- Permission checks
+
+#### `/lock [channel] [reason]`
+Locks a channel by removing Send Messages permission from @everyone.
+
+**Parameters:**
+- `channel` - Channel to lock (optional, defaults to current channel)
+- `reason` - Reason for locking (optional)
+
+**Features:**
+- Cute lock notification message
+- Permission backup and restoration
+- Staff-only access during lock
+- Comprehensive logging
+
+#### `/unlock [channel] [reason]`
+Unlocks a previously locked channel by restoring Send Messages permission.
+
+**Parameters:**
+- `channel` - Channel to unlock (optional, defaults to current channel)
+- `reason` - Reason for unlocking (optional)
+
+**Features:**
+- Cute unlock notification message
+- Permission restoration
+- Logging and case tracking
+
+#### `/slowmode <duration> [channel] [reason]`
+Sets slowmode (rate limit) for a channel.
+
+**Parameters:**
+- `duration` - Slowmode duration (0s to disable, max 6h)
+- `channel` - Channel to set slowmode (optional, defaults to current channel)
+- `reason` - Reason for slowmode (optional)
+
+**Features:**
+- Human-readable duration formatting
+- Smart duration parsing (5s, 1m, 2h, etc.)
+- Automatic disable with 0 duration
+- Visual confirmation with duration display
+
+#### `/search <query> [type] [limit]`
+Search through moderation logs to find specific cases.
+
+**Parameters:**
+- `query` - Search term (user, moderator, reason, or user ID)
+- `type` - Filter by action type (warn, ban, kick, mute, etc.) (optional)
+- `limit` - Number of results to show (1-20, default: 10) (optional)
+
+**Features:**
+- Multi-field search (usernames, moderators, reasons)
+- Action type filtering
+- Pagination for large result sets
+- Case details with timestamps
+- Useful for finding related incidents
+
+#### `/notes <subcommand>`
+Manage staff notes for users (staff-only visibility).
+
+**Subcommands:**
+- `add <user> <note>` - Add a note to a user
+- `view <user>` - View all notes for a user  
+- `remove <user> <note_id>` - Remove a specific note
+
+**Features:**
+- Staff-only visibility (ephemeral responses)
+- Unique note IDs for easy management
+- Timestamp tracking
+- Moderator attribution
+- Pagination for users with many notes
+
+#### `/userinfo <user>`
+Get comprehensive information about a user (staff-only).
+
+**Parameters:**
+- `user` - The user to get information about (required)
+
+**Features:**
+- **Basic Info**: Account age, creation date, bot status
+- **Server Info**: Join date, roles, nickname, server tenure
+- **Current Status**: Online status, timeouts, key permissions
+- **Moderation History**: Case counts by type, most recent action
+- **Staff Notes**: Recent notes with previews
+- **Account Safety**: Handles users not in server
+- **Quick Access**: Links to related commands for detailed views
+
 #### `/modstats [moderator]`
 View moderation statistics for yourself or another moderator.
 
@@ -170,10 +274,16 @@ Opens the main configuration interface with interactive buttons.
 **Sections:**
 - **General**: Basic bot settings and information
 - **Staff**: Manage staff roles and permissions
-- **Commands**: Configure command permissions and access (with pagination)
+- **Commands**: Configure command permissions and access (with search and pagination)
 - **Automod**: Configure warning thresholds and automatic punishments
 - **Logs**: Set up logging channels and customize ban templates
 - **Appeals**: Configure Discord invite-based appeal system
+
+**Command Management Features:**
+- **Search Functionality**: Find commands quickly with search modal
+- **Pagination**: Navigate through large command lists efficiently
+- **Interactive Management**: Click-to-configure with visual status indicators
+- **Permission Control**: Granular access control per command
 
 ### 💬 General Commands
 
@@ -302,17 +412,21 @@ Tomo uses a comprehensive permission system with multiple layers:
 tomo-bot/
 ├── commands/          # Slash commands
 │   ├── general/       # Public commands (help, afk)
-│   ├── moderation/    # Mod commands (ban, unban, warn, warnings, delwarn, stats)
+│   ├── moderation/    # Mod commands (ban, unban, warn, warnings, delwarn, kick, lock, unlock, slowmode, search, notes, userinfo)
 │   └── util/          # Utility commands (config)
 ├── data/              # JSON database files
 ├── events/            # Discord.js event handlers
 ├── handlers/          # Component handlers
 ├── helpers/           # Utility functions
 ├── interactions/      # Discord interactions
-│   ├── buttons/       # Button interactions
+│   ├── buttons/       # Button interactions (including search functionality)
 │   ├── menus/         # Select menu interactions
-│   └── modals/        # Modal form interactions
+│   └── modals/        # Modal form interactions (including search modal)
 ├── models/            # Data models and database
+│   ├── BaseModel.js   # Base database model
+│   ├── ConfigModel.js # Configuration management
+│   ├── ModerationActionModel.js # Case and action tracking
+│   └── UserNotesModel.js # Staff notes system
 ├── utils/             # Shared utilities
 └── index.js           # Main bot entry point
 ```
@@ -332,6 +446,16 @@ tomo-bot/
 }
 ```
 
+### User Notes
+```json
+{
+  "userId": "123456789012345678",
+  "moderatorId": "123456789012345678", 
+  "note": "User was very cooperative during appeal process",
+  "timestamp": "2023-12-01T12:00:00.000Z",
+  "id": "1701432000000"
+}
+```
 ### Appeals
 ```json
 {
@@ -346,6 +470,7 @@ tomo-bot/
   "processedAt": "2023-12-01T13:00:00.000Z",
   "processedBy": "123456789012345678"
 }
+```
 ```
 
 ### Configuration
@@ -402,6 +527,13 @@ tomo-bot/
 - `getUserWarnings(userId, guildId)` - Get all warnings for a user
 - `getStatistics()` - Get server-wide statistics
 - `getModeratorStatistics(moderatorId)` - Get moderator statistics
+- `find(query)` - Search moderation logs with filtering
+
+#### UserNotesModel
+- `addNote(userId, moderatorId, note)` - Add a staff note to a user
+- `getUserNotes(userId)` - Get all notes for a specific user
+- `deleteNote(noteId)` - Remove a specific note by ID
+- `getAllNotes()` - Get all notes (admin use)
 
 #### ConfigModel
 - `getConfig()` - Get current configuration
