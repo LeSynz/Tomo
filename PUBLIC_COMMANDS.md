@@ -78,9 +78,10 @@ Tomo automatically discovers and registers commands when she starts up:
 
 Use the `/config` command to access Tomo's configuration panel:
 
-1. **🔄 Refresh Commands** - Re-scan all commands and update their public status
-2. **🔍 Discover Commands** - Find and register new commands only
-3. **⚙️ Manage Individual Commands** - Toggle enabled/public status and manage permissions
+1. **🎛️ Manage Individual Commands** - Full command management with pagination
+2. **⚡ Quick Enable/Disable Commands** - Toggle commands on/off quickly
+3. **🔄 Scan for New Commands** - Re-scan all commands and update their public status
+4. **🔍 Discover Available Commands** - Find and register new commands only
 
 ## 💖 Examples
 
@@ -92,9 +93,12 @@ Use the `/config` command to access Tomo's configuration panel:
 
 ### Staff Commands (Requires Staff Role) 🛡️
 - `/config` ⚙️ - Access configuration panel
-- `/moderation` 🔨 - Moderation tools
-- `/ban` 🚫 - Ban management
-- `/logs` 📝 - View logs
+- `/ban` 🚫 - Ban management with custom messages
+- `/unban` ✅ - Unban users
+- `/case` � - View case information
+- `/reason` � - Update case reasons
+- `/modstats` 📊 - View moderation statistics
+- `/modlogs` � - View case history
 
 ## 🎀 Configuration Interface
 

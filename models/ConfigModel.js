@@ -9,7 +9,21 @@ class ConfigModel extends BaseModel {
     async getConfig() {
         let config = await this.findOne({ id: 'global' });
         if (!config) {
-            config = { id: 'global', staffRoles: [], commands: {}, logsChannelId: null, appealInvite: null, loggingEnabled: true, appealsEnabled: true };
+            config = { 
+                id: 'global', 
+                staffRoles: [], 
+                commands: {}, 
+                logsChannelId: null, 
+                appealInvite: null, 
+                loggingEnabled: true, 
+                appealsEnabled: true,
+                banEmbed: {
+                    title: '🔨 You have been banned',
+                    description: 'You have been banned from **{server}**',
+                    color: 0xFFB6C1,
+                    footer: 'Contact staff if you believe this is a mistake'
+                }
+            };
             await this.create(config);
         }
 
@@ -30,6 +44,16 @@ class ConfigModel extends BaseModel {
 
         if (config.appealsEnabled === undefined) {
             config.appealsEnabled = true;
+            await this.setConfig(config);
+        }
+
+        if (config.banEmbed === undefined) {
+            config.banEmbed = {
+                title: '🔨 You have been banned',
+                description: 'You have been banned from **{server}**',
+                color: 0xFFB6C1,
+                footer: 'Contact staff if you believe this is a mistake'
+            };
             await this.setConfig(config);
         }
 
@@ -399,6 +423,27 @@ class ConfigModel extends BaseModel {
         const config = await this.getConfig();
         if (!config || !config.staffRoles) return false;
         return userRoles.some(roleId => config.staffRoles.includes(roleId));
+    }
+
+    async setBanEmbedTemplate(embedData) {
+        const config = await this.getConfig();
+        config.banEmbed = {
+            title: embedData.title || '🔨 You have been banned',
+            description: embedData.description || 'You have been banned from **{server}**',
+            color: embedData.color || 0xFFB6C1,
+            footer: embedData.footer || 'Contact staff if you believe this is a mistake'
+        };
+        return await this.setConfig(config);
+    }
+
+    async getBanEmbedTemplate() {
+        const config = await this.getConfig();
+        return config.banEmbed || {
+            title: '🔨 You have been banned',
+            description: 'You have been banned from **{server}**',
+            color: 0xFFB6C1,
+            footer: 'Contact staff if you believe this is a mistake'
+        };
     }
 }
 

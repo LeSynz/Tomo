@@ -1,6 +1,60 @@
 # 🌸 Tomo's Configuration System
 
-A comprehensive guid## 🎯 Permission Resolution Logic
+A comprehensive guide to configuring your cute Discord moderation bot! 💖
+
+## 🛡️ Global Staff Roles
+
+* List of roles considered as **staff** (e.g., moderators, admins) ✨
+* Staff roles get default command permissions **unless overridden** 🎀
+* **Note:** Per-command blacklist takes priority over global staff roles 🚫
+
+Example:
+
+```yaml
+staff_roles:
+  - Moderator 🔨
+  - Admin 👑
+  - Helper 💝
+```
+
+---
+
+## ⚙️ Command Configuration
+
+### Per Command Settings 💕
+
+* **Enabled:** 🎛️ Boolean to enable or disable the command
+* **Public:** 🌍 Whether the command is available to everyone or staff-only 🛡️
+* **Whitelist Roles:** ✨ Roles explicitly allowed to use the command
+* **Blacklist Roles:** 🚫 Roles explicitly forbidden to use the command
+* **Overrides:** 🎯
+
+  * Blacklist roles override global staff roles 🚫
+  * Whitelist roles grant access even if not in staff roles (unless blacklisted) ✨
+  * Public commands are available to everyone (unless blacklisted) 🌍
+
+Example:
+
+```yaml
+commands:
+  ban:
+    enabled: true ✅
+    isPublic: false 🛡️
+    whitelist_roles:
+      - Moderator 🔨
+      - Admin 👑
+    blacklist_roles:
+      - Trial-Moderator 🚫
+  help:
+    enabled: true ✅
+    isPublic: true 🌍
+    whitelist_roles: []
+    blacklist_roles: []
+```
+
+---
+
+## 🎯 Permission Resolution Logic
 
 1. **Owner Check** 👑 → Always allow (server owner bypass)
 2. **Command Disabled** ❌ → Deny immediately  
@@ -16,12 +70,18 @@ A comprehensive guid## 🎯 Permission Resolution Logic
 
 ### 🎀 Channel Settings
 * **Logs Channel:** 📝 Where moderation actions are logged
-* **Appeals Channel:** 🆘 Where ban appeals are posted for staff review
+* **Appeals System:** ⚖️ Discord invite-based appeals with custom ban messages
 
-### 🌸 Appeal System Settings
-* **Appeal URL:** 🔗 Web form URL for banned users
-* **Appeal Port:** 🌐 Port for the web server (default: 3000)
-* **Rate Limiting:** ⏱️ Prevents spam submissions
+### 🌸 Discord Invite-Based Appeals
+* **Appeal Invite:** 🔗 Discord server invite for banned users to join and appeal
+* **System Toggle:** 🎛️ Enable/disable the appeals system server-wide
+* **Custom Ban Messages:** � Customizable ban embed templates with variables
+
+### 🎨 Ban Embed Customization
+* **Template Variables:** Support for {user}, {server}, {reason}, {caseId}, {appealInvite}, {moderator}
+* **Custom Styling:** Personalized colors, titles, descriptions, and footers
+* **Reset Option:** 🔄 Restore to default Tomo pink theme anytime
+* **Real-time Preview:** 👀 See how your ban message will look before saving
 
 ### ✨ Auto-Discovery Features
 * **Command Registration:** 🔄 Automatically detects new commands
@@ -39,7 +99,15 @@ Example Configuration Structure:
 {
   "staffRoles": ["roleId1", "roleId2"],
   "logsChannelId": "channelId",
-  "appealsChannelId": "channelId", 
+  "appealInvite": "https://discord.gg/appeals",
+  "loggingEnabled": true,
+  "appealsEnabled": true,
+  "banEmbed": {
+    "title": "🔨 You have been banned",
+    "description": "You have been banned from **{server}**",
+    "color": 16761769,
+    "footer": "Contact staff if you believe this is a mistake"
+  },
   "commands": {
     "ban": {
       "enabled": true,
@@ -69,10 +137,12 @@ Example Configuration Structure:
 
 ### 💕 Management Workflow
 1. Set up global staff roles first 🛡️
-2. Configure logs and appeals channels 📝
-3. Review auto-discovered commands 🔍
-4. Adjust individual command permissions as needed ⚙️
-5. Test with different role combinations ✅
+2. Configure logs channel and enable logging system 📝
+3. Set up Discord appeal server invite and enable appeals ⚖️
+4. Customize ban embed template with your server's branding 🎨
+5. Review auto-discovered commands 🔍
+6. Adjust individual command permissions as needed ⚙️
+7. Test with different role combinations ✅
 
 *Made with 💖 by Tomo - Your cute moderation assistant!* 🌸 your cute Discord moderation bot! 💖
 

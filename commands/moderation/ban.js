@@ -3,6 +3,7 @@ const permissionChecker = require('../../utils/permissionChecker');
 const moderationLogger = require('../../utils/moderationLogger');
 const ModerationActionModel = require('../../models/ModerationActionModel');
 const ConfigModel = require('../../models/ConfigModel');
+const { processBanEmbedTemplate } = require('../../utils/templateProcessor');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -130,11 +131,21 @@ module.exports = {
       const configModel = new ConfigModel();
       const appealInvite = await configModel.getAppealInvite();
       const appealsEnabled = await configModel.isAppealsEnabled();
+      const banTemplate = await configModel.getBanEmbedTemplate();
+      
+      const processedTemplate = processBanEmbedTemplate(banTemplate, {
+        user: targetUser,
+        server: interaction.guild,
+        reason: reason,
+        caseId: dbAction.caseId,
+        appealInvite: appealInvite,
+        moderator: interaction.user
+      });
       
       const dmEmbed = new EmbedBuilder()
-        .setColor(0xFFB6C1)
-        .setTitle('🔨 You have been banned')
-        .setDescription(`You have been banned from **${interaction.guild.name}**`)
+        .setColor(processedTemplate.color)
+        .setTitle(processedTemplate.title)
+        .setDescription(processedTemplate.description)
         .addFields(
           {
             name: '💭 Reason',
@@ -148,7 +159,7 @@ module.exports = {
           }
         )
         .setFooter({ 
-          text: (appealsEnabled && appealInvite) ? 'You can appeal this ban using the button below' : 'Contact staff if you believe this is a mistake',
+          text: processedTemplate.footer,
           iconURL: interaction.guild.iconURL() 
         })
         .setTimestamp();

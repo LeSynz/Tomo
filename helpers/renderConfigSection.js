@@ -34,12 +34,13 @@ module.exports = async function renderConfigSection(section, interaction) {
     const appealsInviteText = config.appealInvite
     // turns out trynna hyperlink the url with itself breaks discord markdown
     // rip `[${config.appealInvite}](${config.appealInvite})` - ya learn something new every day - 00:32
+    // why the fuck did i try hyperlink a link with itself. - 00:52
       ? `[Appeals Server](${config.appealInvite})`
       : '❌ No appeal server invite set';
 
     const loggingEnabled = config.loggingEnabled !== false;
     const appealsEnabled = config.appealsEnabled !== false;
-S
+
     const container = new ContainerBuilder();
 
     container.addTextDisplayComponents(
@@ -151,7 +152,6 @@ S
           new TextDisplayBuilder().setContent(`### 📋 Logging Configuration\n*Control your bot's logging and appeals systems*\n\n**🔧 System Status:**\n📝 **Moderation Logging:** ${loggingEnabled ? '✅ Enabled' : '❌ Disabled'}\n⚖️ **User Appeals System:** ${appealsEnabled ? '✅ Enabled' : '❌ Disabled'}\n\n**📍 Configuration:**\n**Moderation Logs:** ${logsChannelText}\n*Where moderation actions (mutes, bans, etc.) are recorded*\n\n**Appeal Server Invite:** ${appealsInviteText}\n*Discord server where users can appeal their punishments*`)
         );
 
-        // System toggle buttons
         const toggleLoggingButton = new ButtonBuilder()
           .setCustomId('toggle_logging_system')
           .setLabel(loggingEnabled ? '📝 Disable Logging' : '📝 Enable Logging')
@@ -166,7 +166,6 @@ S
           new ActionRowBuilder().addComponents(toggleLoggingButton, toggleAppealsButton)
         );
 
-        // Channel setup buttons (only show if systems are enabled)
         if (loggingEnabled || appealsEnabled) {
           const channelButtons = [];
           
@@ -194,6 +193,20 @@ S
             );
           }
         }
+
+        const banEmbedButton = new ButtonBuilder()
+          .setCustomId('set_ban_embed_template')
+          .setLabel('🎨 Customize Ban Message')
+          .setStyle(ButtonStyle.Secondary);
+
+        const resetBanEmbedButton = new ButtonBuilder()
+          .setCustomId('reset_ban_embed_template')
+          .setLabel('🔄 Reset to Default')
+          .setStyle(ButtonStyle.Danger);
+
+        container.addActionRowComponents(
+          new ActionRowBuilder().addComponents(banEmbedButton, resetBanEmbedButton)
+        );
         break;
 
       case 'general':

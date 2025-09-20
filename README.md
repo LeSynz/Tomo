@@ -12,22 +12,24 @@ A feature-rich Discord moderation bot with a cute pink aesthetic, built with Dis
 - **Role Hierarchy**: Respects Discord's role hierarchy for safety
 
 ### 📝 Appeal System
-- **Web-Based Appeals**: Beautiful, responsive appeal form with dark theme
-- **Security**: Prevents duplicate and fraudulent appeals
-- **Discord Integration**: Appeals posted directly to staff channels
-- **Status Tracking**: Pending, approved, and denied appeal states
-- **Anti-Spam**: Rate limiting and duplicate prevention
+- **Discord Invite-Based Appeals**: Users join a Discord server to submit appeals
+- **Customizable Ban Messages**: Template system with variables for personalized ban notifications
+- **Appeal Integration**: Ban messages include direct links to appeal servers when enabled
+- **System Toggles**: Enable/disable appeals system server-wide
+- **Anti-Spam**: Built-in prevention of duplicate and fraudulent appeals
 
 ### ⚙️ Configuration Management
 - **Permission System**: Granular command permissions with whitelist/blacklist
 - **Staff Roles**: Global staff role management
-- **Channel Settings**: Configurable logs and appeals channels
+- **Channel Settings**: Configurable logs channels and appeal system
 - **Auto-Discovery**: Automatic command registration and configuration
+- **Scalable Interface**: Paginated command management for unlimited commands
 
 ### 🎨 User Experience
 - **Cute Aesthetic**: Pink theme with friendly messages and emojis
-- **Interactive UI**: Discord buttons, select menus, and modals
+- **Interactive UI**: Discord buttons, select menus, and modals with seamless navigation
 - **Help System**: Comprehensive help with action buttons
+- **Customizable Templates**: Personalize ban messages with variables and custom styling
 - **Error Handling**: Graceful error messages and recovery
 
 ## 🚀 Quick Start
@@ -54,8 +56,6 @@ A feature-rich Discord moderation bot with a cute pink aesthetic, built with Dis
    Create a `.env` file in the root directory:
    ```env
    DISCORD_TOKEN=your_bot_token_here
-   APPEAL_URL=http://localhost:3000
-   APPEAL_PORT=3000
    ```
 
 4. **Start the bot**
@@ -82,9 +82,10 @@ Bans a user from the server with optional message deletion.
 
 **Features:**
 - Automatic case ID generation
-- DM notification with appeal link
+- DM notification with custom ban template and appeal link
 - Comprehensive permission checks
 - Moderation logging
+- Customizable ban message with variables
 
 #### `/unban <user> [reason]`
 Unbans a previously banned user.
@@ -125,9 +126,9 @@ Opens the main configuration interface with interactive buttons.
 **Sections:**
 - **General**: Basic bot settings and information
 - **Staff**: Manage staff roles and permissions
-- **Commands**: Configure command permissions and access
-- **Logs**: Set up logging channels
-- **Appeals**: Configure the appeal system
+- **Commands**: Configure command permissions and access (with pagination)
+- **Logs**: Set up logging channels and customize ban templates
+- **Appeals**: Configure Discord invite-based appeal system
 
 ### 💬 General Commands
 
@@ -162,11 +163,12 @@ Set yourself as away from keyboard with an optional reason.
    ```
    Select roles that should have moderation permissions.
 
-3. **Set Up Channels**
+3. **Set Up Appeal System**
    ```
-   /config → Logs → Set Channel (for moderation logs)
-   /config → Appeals → Set Channel (for ban appeals)
+   /config → Logs → Set Appeal Server Invite
+   /config → Logs → Customize Ban Message
    ```
+   Configure Discord server invite for appeals and customize ban message template.
 
 4. **Configure Commands**
    ```
@@ -192,22 +194,26 @@ Tomo uses a comprehensive permission system with multiple layers:
 
 ### Appeal System Configuration
 
-1. **Set Appeals Channel**
+1. **Enable Appeals System**
    ```
-   /config → Appeals → Set Channel
-   ```
-
-2. **Configure Web Server**
-   Ensure these environment variables are set:
-   ```env
-   APPEAL_URL=https://yourdomain.com
-   APPEAL_PORT=3000
+   /config → Logs → Enable Appeals
    ```
 
-3. **Appeal Workflow**
-   - User gets banned → Receives DM with appeal link
-   - User fills appeal form → Posted to appeals channel
-   - Staff use buttons to approve/deny → User gets notified
+2. **Set Appeal Server Invite**
+   ```
+   /config → Logs → Set Appeal Server Invite
+   ```
+
+3. **Customize Ban Messages**
+   ```
+   /config → Logs → Customize Ban Message
+   ```
+   Create personalized ban notifications with variables like {user}, {server}, {reason}, {caseId}, {appealInvite}
+
+4. **Appeal Workflow**
+   - User gets banned → Receives custom DM with appeal server invite
+   - User joins appeal server → Submits appeal through Discord
+   - Staff review appeals in the appeal server → Take appropriate action
 
 ## 🏗️ Project Structure
 
@@ -227,9 +233,6 @@ tomo-bot/
 │   └── modals/        # Modal form interactions
 ├── models/            # Data models and database
 ├── utils/             # Shared utilities
-├── web/               # Appeal system web server
-│   ├── public/        # Static files (CSS, JS)
-│   └── views/         # HTML templates
 └── index.js           # Main bot entry point
 ```
 
@@ -270,7 +273,15 @@ tomo-bot/
   "id": "global",
   "staffRoles": ["role_id_1", "role_id_2"],
   "logsChannelId": "123456789012345678",
-  "appealsChannelId": "123456789012345678",
+  "appealInvite": "https://discord.gg/appeals",
+  "loggingEnabled": true,
+  "appealsEnabled": true,
+  "banEmbed": {
+    "title": "🔨 You have been banned",
+    "description": "You have been banned from **{server}**",
+    "color": 16761769,
+    "footer": "Contact staff if you believe this is a mistake"
+  },
   "commands": {
     "ban": {
       "enabled": true,
@@ -293,15 +304,14 @@ tomo-bot/
 - `getStatistics()` - Get server-wide statistics
 - `getModeratorStatistics(moderatorId)` - Get moderator statistics
 
-#### AppealModel
-- `submitAppeal(data)` - Submit a new appeal
-- `hasActivePendingAppeal(caseId, userId)` - Check for existing appeals
-- `updateAppealStatus(caseId, userId, status, processedBy)` - Update appeal
-- `getAppealHistory(userId)` - Get user's appeal history
-
 #### ConfigModel
 - `getConfig()` - Get current configuration
 - `setConfig(data)` - Update configuration
+- `setBanEmbedTemplate(data)` - Set custom ban embed template
+- `getBanEmbedTemplate()` - Get current ban embed template
+- `setAppealInvite(invite)` - Set Discord appeal server invite
+- `setLoggingEnabled(enabled)` - Toggle logging system
+- `setAppealsEnabled(enabled)` - Toggle appeals system
 - `checkCommandPermission(command, userRoles, isOwner)` - Check permissions
 - `registerCommand(name, isPublic, enabled)` - Register new command
 
@@ -397,10 +407,10 @@ The bot uses a consistent pink theme defined in:
 4. Review blacklist/whitelist settings
 
 #### Appeal System Issues
-1. Verify appeals channel is set: `/config → Appeals`
-2. Check web server is running (port 3000 by default)
-3. Ensure `APPEAL_URL` environment variable is correct
-4. Check browser console for JavaScript errors
+1. Verify appeals system is enabled: `/config → Logs → Enable Appeals`
+2. Check appeal server invite is set: `/config → Logs → Set Appeal Server Invite`
+3. Ensure ban message template includes {appealInvite} variable
+4. Test custom ban message template with preview feature
 
 #### Permission Errors
 1. Verify staff roles are configured: `/config → Staff`
