@@ -6,6 +6,8 @@ A feature-rich Discord moderation bot with a cute pink aesthetic, built with Dis
 
 ### 🛡️ Moderation System
 - **Ban/Unban**: Advanced ban system with case tracking and appeal integration
+- **Warning System**: Comprehensive warning management with automated escalation
+- **Automod Integration**: Automatic punishments based on warning thresholds
 - **Case Management**: Automatic case ID generation and logging
 - **Moderation Statistics**: Detailed stats for individual moderators and servers
 - **Case History**: Complete moderation logs with searchable history
@@ -21,6 +23,7 @@ A feature-rich Discord moderation bot with a cute pink aesthetic, built with Dis
 ### ⚙️ Configuration Management
 - **Permission System**: Granular command permissions with whitelist/blacklist
 - **Staff Roles**: Global staff role management
+- **Automod Rules**: Configurable warning thresholds with automatic punishments
 - **Channel Settings**: Configurable logs channels and appeal system
 - **Auto-Discovery**: Automatic command registration and configuration
 - **Scalable Interface**: Paginated command management for unlimited commands
@@ -94,6 +97,47 @@ Unbans a previously banned user.
 - `user` - The user to unban (required)
 - `reason` - Reason for the unban (optional)
 
+#### `/warn <user> [reason]`
+Issues a warning to a user with automatic automod integration.
+
+**Parameters:**
+- `user` - The user to warn (required)
+- `reason` - Reason for the warning (optional)
+
+**Features:**
+- Automatic case ID generation
+- DM notification to warned user
+- Automod threshold checking
+- Automatic punishment escalation (mute/kick/ban)
+- Custom ban embed templates for automod bans
+- Comprehensive permission and hierarchy checks
+
+#### `/warnings <user>`
+View all warnings for a specific user.
+
+**Parameters:**
+- `user` - The user whose warnings to view (required)
+
+**Features:**
+- Complete warning history display
+- Chronological ordering (newest first)
+- Shows up to 10 most recent warnings
+- Case details with moderator information
+- Clean record celebration for users with no warnings
+
+#### `/delwarn <user>`
+Delete a specific warning from a user's history using an interactive menu.
+
+**Parameters:**
+- `user` - The user whose warning to delete (required)
+
+**Features:**
+- Interactive select menu showing all warnings
+- Visual warning preview with dates and reasons
+- Confirmation display with full warning details
+- Supports up to 25 most recent warnings in menu
+- Comprehensive deletion logging
+
 #### `/modstats [moderator]`
 View moderation statistics for yourself or another moderator.
 
@@ -127,6 +171,7 @@ Opens the main configuration interface with interactive buttons.
 - **General**: Basic bot settings and information
 - **Staff**: Manage staff roles and permissions
 - **Commands**: Configure command permissions and access (with pagination)
+- **Automod**: Configure warning thresholds and automatic punishments
 - **Logs**: Set up logging channels and customize ban templates
 - **Appeals**: Configure Discord invite-based appeal system
 
@@ -176,6 +221,13 @@ Set yourself as away from keyboard with an optional reason.
    ```
    Set permissions for individual commands.
 
+5. **Set Up Automod System**
+   ```
+   /config → Automod → Enable System
+   /config → Automod → Add Rule
+   ```
+   Configure automatic punishments based on warning thresholds.
+
 ### Permission System
 
 Tomo uses a comprehensive permission system with multiple layers:
@@ -215,13 +267,42 @@ Tomo uses a comprehensive permission system with multiple layers:
    - User joins appeal server → Submits appeal through Discord
    - Staff review appeals in the appeal server → Take appropriate action
 
+### Automod System Configuration
+
+1. **Enable Automod System**
+   ```
+   /config → Automod → Enable System
+   ```
+
+2. **Add Warning Threshold Rules**
+   ```
+   /config → Automod → Add Rule
+   ```
+   Configure automatic punishments:
+   - **Threshold**: Number of warnings to trigger (1-50)
+   - **Action**: Type of punishment (mute, kick, ban)
+   - **Duration**: For mutes only (1m, 1h, 1d, etc.)
+
+3. **Manage Existing Rules**
+   ```
+   /config → Automod → Manage Rules
+   ```
+   View, edit, or remove existing automod rules
+
+4. **Automod Features**
+   - **Automatic Escalation**: Punishments trigger when warning thresholds are reached
+   - **Custom Ban Templates**: Automod bans use the same custom templates as manual bans
+   - **Comprehensive Logging**: All automod actions are logged with proper case IDs
+   - **DM Notifications**: Users receive appropriate DMs for all automod punishments
+   - **Appeal Integration**: Automod bans include full appeal system integration
+
 ## 🏗️ Project Structure
 
 ```
 tomo-bot/
 ├── commands/          # Slash commands
 │   ├── general/       # Public commands (help, afk)
-│   ├── moderation/    # Mod commands (ban, unban, stats)
+│   ├── moderation/    # Mod commands (ban, unban, warn, warnings, delwarn, stats)
 │   └── util/          # Utility commands (config)
 ├── data/              # JSON database files
 ├── events/            # Discord.js event handlers
@@ -276,6 +357,22 @@ tomo-bot/
   "appealInvite": "https://discord.gg/appeals",
   "loggingEnabled": true,
   "appealsEnabled": true,
+  "automodEnabled": true,
+  "automodRules": [
+    {
+      "threshold": 3,
+      "action": "mute",
+      "duration": 3600000
+    },
+    {
+      "threshold": 5,
+      "action": "kick"
+    },
+    {
+      "threshold": 7,
+      "action": "ban"
+    }
+  ],
   "banEmbed": {
     "title": "🔨 You have been banned",
     "description": "You have been banned from **{server}**",
@@ -300,7 +397,9 @@ tomo-bot/
 #### ModerationActionModel
 - `logAction(data)` - Log a new moderation action
 - `getCase(caseId)` - Get a specific case
+- `deleteCase(caseId)` - Delete a specific case
 - `getUserCases(userId)` - Get all cases for a user
+- `getUserWarnings(userId, guildId)` - Get all warnings for a user
 - `getStatistics()` - Get server-wide statistics
 - `getModeratorStatistics(moderatorId)` - Get moderator statistics
 
@@ -312,6 +411,11 @@ tomo-bot/
 - `setAppealInvite(invite)` - Set Discord appeal server invite
 - `setLoggingEnabled(enabled)` - Toggle logging system
 - `setAppealsEnabled(enabled)` - Toggle appeals system
+- `setAutomodEnabled(enabled)` - Toggle automod system
+- `addAutomodRule(threshold, action, duration)` - Add automod rule
+- `removeAutomodRule(threshold)` - Remove automod rule
+- `getAutomodRules()` - Get all automod rules
+- `getAutomodActionForWarnings(count)` - Get applicable automod action
 - `checkCommandPermission(command, userRoles, isOwner)` - Check permissions
 - `registerCommand(name, isPublic, enabled)` - Register new command
 

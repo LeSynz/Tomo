@@ -32,9 +32,6 @@ module.exports = async function renderConfigSection(section, interaction) {
       : '❌ No logs channel set';
 
     const appealsInviteText = config.appealInvite
-    // turns out trynna hyperlink the url with itself breaks discord markdown
-    // rip `[${config.appealInvite}](${config.appealInvite})` - ya learn something new every day - 00:32
-    // why the fuck did i try hyperlink a link with itself. - 00:52
       ? `[Appeals Server](${config.appealInvite})`
       : '❌ No appeal server invite set';
 
@@ -209,6 +206,48 @@ module.exports = async function renderConfigSection(section, interaction) {
         );
         break;
 
+      case 'automod':
+        const automodRules = config.automodRules || [];
+        const automodEnabled = config.automodEnabled !== false;
+        
+        let rulesText = '❌ No automod rules configured';
+        if (automodRules.length > 0) {
+          rulesText = automodRules
+            .sort((a, b) => a.threshold - b.threshold)
+            .map(rule => `**${rule.threshold} warnings** → ${rule.action === 'mute' ? `Mute for ${rule.duration}` : rule.action === 'kick' ? 'Kick' : 'Ban'}`)
+            .join('\n');
+        }
+
+        container.addTextDisplayComponents(
+          new TextDisplayBuilder().setContent(`### 🤖 Automatic Moderation\n*Automatically punish users when they reach warning thresholds*\n\n**🔧 System Status:**\n🤖 **Automod System:** ${automodEnabled ? '✅ Enabled' : '❌ Disabled'}\n\n**📋 Current Rules:**\n${rulesText}\n\n*Rules are applied in order from lowest to highest threshold*`)
+        );
+
+        const toggleAutomodButton = new ButtonBuilder()
+          .setCustomId('toggle_automod_system')
+          .setLabel(automodEnabled ? '🤖 Disable Automod' : '🤖 Enable Automod')
+          .setStyle(automodEnabled ? ButtonStyle.Danger : ButtonStyle.Success);
+
+        container.addActionRowComponents(
+          new ActionRowBuilder().addComponents(toggleAutomodButton)
+        );
+
+        if (automodEnabled) {
+          const addRuleButton = new ButtonBuilder()
+            .setCustomId('add_automod_rule')
+            .setLabel('➕ Add Rule')
+            .setStyle(ButtonStyle.Success);
+
+          const manageRulesButton = new ButtonBuilder()
+            .setCustomId('manage_automod_rules')
+            .setLabel('⚙️ Manage Rules')
+            .setStyle(ButtonStyle.Secondary);
+
+          container.addActionRowComponents(
+            new ActionRowBuilder().addComponents(addRuleButton, manageRulesButton)
+          );
+        }
+        break;
+
       case 'general':
       default:
         container.addTextDisplayComponents(
@@ -228,6 +267,7 @@ module.exports = async function renderConfigSection(section, interaction) {
       { id: 'config_staff', label: '👥 Staff Roles', emoji: '👥' },
       { id: 'config_commands', label: '🎮 Commands', emoji: '🎮' },
       { id: 'config_logs', label: '📋 Logging', emoji: '📋' },
+      { id: 'config_automod', label: '🤖 Automod', emoji: '🤖' },
     ];
 
     const buttonRow = new ActionRowBuilder().addComponents(

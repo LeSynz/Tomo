@@ -17,6 +17,8 @@ class ConfigModel extends BaseModel {
                 appealInvite: null, 
                 loggingEnabled: true, 
                 appealsEnabled: true,
+                automodEnabled: true,
+                automodRules: [],
                 banEmbed: {
                     title: '🔨 You have been banned',
                     description: 'You have been banned from **{server}**',
@@ -54,6 +56,16 @@ class ConfigModel extends BaseModel {
                 color: 0xFFB6C1,
                 footer: 'Contact staff if you believe this is a mistake'
             };
+            await this.setConfig(config);
+        }
+
+        if (config.automodEnabled === undefined) {
+            config.automodEnabled = true;
+            await this.setConfig(config);
+        }
+
+        if (config.automodRules === undefined) {
+            config.automodRules = [];
             await this.setConfig(config);
         }
 
@@ -444,6 +456,57 @@ class ConfigModel extends BaseModel {
             color: 0xFFB6C1,
             footer: 'Contact staff if you believe this is a mistake'
         };
+    }
+
+    async setAutomodEnabled(enabled) {
+        const config = await this.getConfig();
+        config.automodEnabled = enabled;
+        return await this.setConfig(config);
+    }
+
+    async isAutomodEnabled() {
+        const config = await this.getConfig();
+        return config.automodEnabled !== false;
+    }
+
+    async addAutomodRule(threshold, action, duration = null) {
+        const config = await this.getConfig();
+        if (!config.automodRules) config.automodRules = [];
+        
+        const existingIndex = config.automodRules.findIndex(rule => rule.threshold === threshold);
+        const newRule = { threshold, action, duration };
+        
+        if (existingIndex !== -1) {
+            config.automodRules[existingIndex] = newRule;
+        } else {
+            config.automodRules.push(newRule);
+        }
+        
+        config.automodRules.sort((a, b) => a.threshold - b.threshold);
+        return await this.setConfig(config);
+    }
+
+    async removeAutomodRule(threshold) {
+        const config = await this.getConfig();
+        if (!config.automodRules) return await this.setConfig(config);
+        
+        config.automodRules = config.automodRules.filter(rule => rule.threshold !== threshold);
+        return await this.setConfig(config);
+    }
+
+    async getAutomodRules() {
+        const config = await this.getConfig();
+        return config.automodRules || [];
+    }
+
+    async getAutomodActionForWarnings(warningCount) {
+        const config = await this.getConfig();
+        if (!config.automodEnabled || !config.automodRules) return null;
+        
+        const applicableRules = config.automodRules.filter(rule => warningCount >= rule.threshold);
+        if (applicableRules.length === 0) return null;
+        
+        return applicableRules[applicableRules.length - 1];
     }
 }
 

@@ -42,8 +42,16 @@ class ModerationActionModel extends BaseModel {
         return await this.find({ userId });
     }
 
+    async getUserWarnings(userId, guildId) {
+        return await this.find({ userId, type: 'warn' });
+    }
+
     async getCase(caseId) {
         return await this.findOne({ caseId });
+    }
+
+    async deleteCase(caseId) {
+        return await this.delete({ caseId });
     }
 
     async updateCaseReason(caseId, newReason) {
