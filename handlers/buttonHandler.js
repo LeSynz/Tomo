@@ -2,19 +2,34 @@ const fs = require('fs').promises;
 const path = require('path');
 const logger = require('../utils/logger');
 
+async function getAllJsFiles(dir) {
+	const dirents = await fs.readdir(dir, { withFileTypes: true });
+	const files = await Promise.all(
+		dirents.map((dirent) => {
+			const res = path.resolve(dir, dirent.name);
+			if (dirent.isDirectory()) {
+				return getAllJsFiles(res);
+			} else if (dirent.isFile() && res.endsWith('.js')) {
+				return res;
+			}
+			return [];
+		})
+	);
+	return Array.prototype.concat(...files);
+}
+
 async function loadButtons(client) {
 	const buttonsPath = path.join(__dirname, '..', 'interactions', 'buttons');
 
 	try {
 		await fs.access(buttonsPath);
 
-		const buttonFiles = await fs.readdir(buttonsPath);
-		const jsFiles = buttonFiles.filter((file) => file.endsWith('.js'));
+		const jsFiles = await getAllJsFiles(buttonsPath);
 
 		logger.info(`Found ${jsFiles.length} button handler files`);
 
-		for (const file of jsFiles) {
-			const filePath = path.join(buttonsPath, file);
+		for (const filePath of jsFiles) {
+			const file = path.basename(filePath);
 
 			try {
 				delete require.cache[require.resolve(filePath)];
@@ -96,12 +111,9 @@ async function reloadButton(client, customId) {
 	const buttonsPath = path.join(__dirname, '..', 'interactions', 'buttons');
 
 	try {
-		const buttonFiles = await fs.readdir(buttonsPath);
-		const jsFiles = buttonFiles.filter((file) => file.endsWith('.js'));
+		const jsFiles = await getAllJsFiles(buttonsPath);
 
-		for (const file of jsFiles) {
-			const filePath = path.join(buttonsPath, file);
-
+		for (const filePath of jsFiles) {
 			try {
 				delete require.cache[require.resolve(filePath)];
 				const button = require(filePath);

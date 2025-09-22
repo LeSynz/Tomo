@@ -111,7 +111,6 @@ Thumbs.db
 # Bot specific files
 data/*.json
 !data/config.json.example
-logs/
 *.log
 
 # Database files
