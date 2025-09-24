@@ -6,7 +6,6 @@ module.exports = {
   customId: 'staff_remove_role',
   async execute(interaction) {
     try {
-      const configModel = new ConfigModel();
       const guild = interaction.guild;
       
       if (!guild) {
@@ -16,7 +15,7 @@ module.exports = {
         });
       }
 
-      const staffRoles = await configModel.getStaffRoles();
+      const staffRoles = await ConfigModel.getStaffRoles();
 
       const options = staffRoles
           .map(roleId => {

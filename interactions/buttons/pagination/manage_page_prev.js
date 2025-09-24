@@ -5,8 +5,7 @@ module.exports = {
   customId: 'manage_page_prev',
   async execute(interaction) {
     try {
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       
       const commands = Object.entries(config.commands);
       const itemsPerPage = 20;

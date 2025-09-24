@@ -19,14 +19,13 @@ module.exports = {
         });
       }
 
-      const configModel = new ConfigModel();
       let successCount = 0;
       let invalidRoles = [];
 
       for (const roleId of interaction.values) {
         if (interaction.guild.roles.cache.has(roleId)) {
           try {
-            await configModel.setStaffRole(roleId, false);
+            await ConfigModel.setStaffRole(roleId, false);
             successCount++;
             logger.info(`Removed staff role ${roleId} by ${interaction.user.tag}`);
           } catch (error) {

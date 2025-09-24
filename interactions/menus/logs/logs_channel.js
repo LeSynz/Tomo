@@ -28,11 +28,9 @@ module.exports = {
           ephemeral: true 
         });
       }
-
-      const configModel = new ConfigModel();
       
       try {
-        await configModel.setLogsChannel(channelId);
+        await ConfigModel.setLogsChannel(channelId);
         
         logger.info(`Logs channel set to ${channel.name} (${channelId}) by ${interaction.user.tag}`);
         

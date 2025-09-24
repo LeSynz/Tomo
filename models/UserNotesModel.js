@@ -1,33 +1,56 @@
-const BaseModel = require('./BaseModel');
+const { Schema, model } = require('synz-db');
 
-class UserNotesModel extends BaseModel {
-    constructor() {
-        super('user_notes');
-    }
+const userNoteSchema = new Schema({
+  userId: {
+    type: 'string',
+    required: true
+  },
+  moderatorId: {
+    type: 'string',
+    required: true
+  },
+  note: {
+    type: 'string',
+    required: true
+  },
+  timestamp: {
+    type: 'date',
+    default: () => new Date()
+  },
+  noteId: {
+    type: 'string',
+    unique: true,
+    default: () => Date.now().toString()
+  }
+}, {
+  timestamps: true
+});
 
-    async addNote(userId, moderatorId, note) {
-        const noteData = {
-            userId,
-            moderatorId,
-            note,
-            timestamp: new Date().toISOString(),
-            id: Date.now().toString()
-        };
+// Static methods
+userNoteSchema.statics.addNote = async function(userId, moderatorId, note) {
+  const noteData = {
+    userId,
+    moderatorId,
+    note,
+    timestamp: new Date(),
+    noteId: Date.now().toString()
+  };
 
-        return await this.create(noteData);
-    }
+  return await this.create(noteData);
+};
 
-    async getUserNotes(userId) {
-        return await this.find({ userId });
-    }
+userNoteSchema.statics.getUserNotes = async function(userId) {
+  return await this.find({ userId });
+};
 
-    async deleteNote(noteId) {
-        return await this.delete({ id: noteId });
-    }
+userNoteSchema.statics.deleteNote = async function(noteId) {
+  return await this.deleteMany({ noteId: noteId });
+};
 
-    async getAllNotes() {
-        return await this.find();
-    }
-}
+userNoteSchema.statics.getAllNotes = async function() {
+  return await this.find();
+};
 
-module.exports = new UserNotesModel();
+const UserNote = model('UserNote', userNoteSchema);
+
+module.exports = UserNote;

@@ -19,15 +19,14 @@ module.exports = {
         });
       }
 
-      const configModel = new ConfigModel();
       let toggledCommands = [];
 
       for (const commandName of interaction.values) {
         try {
-          const currentConfig = await configModel.getConfig();
+          const currentConfig = await ConfigModel.getConfig();
           const currentState = currentConfig.commands[commandName]?.enabled !== false;
           
-          await configModel.setCommandEnabled(commandName, !currentState);
+          await ConfigModel.setCommandEnabled(commandName, !currentState);
           toggledCommands.push({
             name: commandName,
             newState: !currentState

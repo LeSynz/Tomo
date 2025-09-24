@@ -6,13 +6,12 @@ module.exports = {
   customId: 'toggle_logging_system',
   async execute(interaction) {
     try {
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       
       const currentStatus = config.loggingEnabled !== false;
       const newStatus = !currentStatus;
       
-      await configModel.setLoggingEnabled(newStatus);
+      await ConfigModel.setLoggingEnabled(newStatus);
       
       const statusText = newStatus ? '✅ Enabled' : '❌ Disabled';
       const embed = new EmbedBuilder()

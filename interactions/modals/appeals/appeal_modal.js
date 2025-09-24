@@ -13,8 +13,7 @@ module.exports = {
       const whyAccept = interaction.fields.getTextInputValue('why_accept');
       const additionalComments = interaction.fields.getTextInputValue('additional_comments') || 'None provided';
 
-      const configModel = new ConfigModel();
-      const appealsChannelId = await configModel.getAppealsChannel();
+      const appealsChannelId = await ConfigModel.getAppealsChannel();
 
       if (!appealsChannelId) {
         return await interaction.reply({

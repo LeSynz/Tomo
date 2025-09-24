@@ -10,8 +10,7 @@ module.exports = {
       const selectedValue = interaction.values[0];
       const threshold = parseInt(selectedValue.replace('remove_', ''));
 
-      const configModel = new ConfigModel();
-      const rules = await configModel.getAutomodRules();
+      const rules = await ConfigModel.getAutomodRules();
       const ruleToRemove = rules.find(rule => rule.threshold === threshold);
 
       if (!ruleToRemove) {
@@ -27,7 +26,7 @@ module.exports = {
         });
       }
 
-      await configModel.removeAutomodRule(threshold);
+      await ConfigModel.removeAutomodRule(threshold);
 
       const actionText = ruleToRemove.action === 'mute' ? `Mute for ${ruleToRemove.duration}` : ruleToRemove.action === 'kick' ? 'Kick' : 'Ban';
       

@@ -6,8 +6,7 @@ module.exports = {
   customId: 'toggle_message_logging_system',
   async execute(interaction) {
     try {
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       
       const currentStatus = config.messageLoggingEnabled !== false;
       const newStatus = !currentStatus;
@@ -18,7 +17,7 @@ module.exports = {
         updatedAt: new Date().toISOString()
       };
       
-      await configModel.setConfig(updatedConfig);
+      await ConfigModel.setConfig(updatedConfig);
       
       const { components } = await renderConfigSection('logs', interaction);
       

@@ -27,8 +27,7 @@ module.exports = {
       const inviteCode = match[1];
       const normalizedInvite = `https://discord.gg/${inviteCode}`;
 
-      const configModel = new ConfigModel();
-      await configModel.setAppealInvite(normalizedInvite);
+      await ConfigModel.setAppealInvite(normalizedInvite);
 
       const embed = new EmbedBuilder()
         .setColor(0x98FB98)

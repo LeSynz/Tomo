@@ -4,7 +4,7 @@ const logger = require('./logger');
 
 class ModerationLogger {
   constructor() {
-    this.configModel = new ConfigModel();
+    // No need to instantiate ConfigModel anymore - using static methods
   }
 
   /**
@@ -22,13 +22,13 @@ class ModerationLogger {
   async logAction(client, action) {
     try {
       // Check if logging is enabled
-      const isLoggingEnabled = await this.configModel.isLoggingEnabled();
+      const isLoggingEnabled = await ConfigModel.isLoggingEnabled();
       if (!isLoggingEnabled) {
         logger.info('Moderation logging is disabled, skipping log');
         return false;
       }
 
-      const logsChannelId = await this.configModel.getLogsChannel();
+      const logsChannelId = await ConfigModel.getLogsChannel();
       
       if (!logsChannelId) {
         logger.info('No logs channel configured, skipping moderation log');
@@ -183,7 +183,7 @@ class ModerationLogger {
 
   async logReasonUpdate(client, { caseId, moderator, target, oldReason, newReason, actionType }) {
     try {
-      const logsChannelId = await this.configModel.getLogsChannel();
+      const logsChannelId = await ConfigModel.getLogsChannel();
       
       if (!logsChannelId) {
         logger.info('No logs channel configured, skipping reason update log');
@@ -233,7 +233,7 @@ class ModerationLogger {
    */
   async isLoggingEnabled(client) {
     try {
-      const logsChannelId = await this.configModel.getLogsChannel();
+      const logsChannelId = await ConfigModel.getLogsChannel();
       if (!logsChannelId) return false;
 
       const logsChannel = await client.channels.fetch(logsChannelId).catch(() => null);

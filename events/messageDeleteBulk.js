@@ -12,8 +12,7 @@ module.exports = {
             const guild = firstMessage.guild;
             const channel = firstMessage.channel;
 
-            const configModel = new ConfigModel();
-            const config = await configModel.getConfig();
+            const config = await ConfigModel.getConfig();
 
             if (!config.messageLoggingEnabled) return;
 

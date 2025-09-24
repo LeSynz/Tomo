@@ -12,10 +12,10 @@ const {
 } = require('discord.js');
 const logger = require('../utils/logger');
 
+
 module.exports = async function renderConfigSection(section, interaction) {
   try {
-    const configModel = new ConfigModel();
-    const config = await configModel.getConfig();
+    const config = await ConfigModel.getConfig();
 
     const staffRolesText = config.staffRoles.length
       ? config.staffRoles.map(r => `<@&${r}>`).join(', ')

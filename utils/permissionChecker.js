@@ -2,18 +2,16 @@ const ConfigModel = require('../models/ConfigModel');
 const logger = require('./logger');
 const { EmbedBuilder } = require('discord.js');
 
-class PermissionChecker {
-  constructor() {
-    this.configModel = new ConfigModel();
-  }
 
+class PermissionChecker {
   async checkCommandPermission(interaction, commandName) {
     try {
-      const userRoles = interaction.member?.roles?.cache?.map(role => role.id) || [];
+      const userRoles = interaction.member?.roles?.cache ? 
+        Array.from(interaction.member.roles.cache.keys()) : [];
       
       const isOwner = interaction.guild?.ownerId === interaction.user.id;
 
-      const result = await this.configModel.checkCommandPermission(commandName, userRoles, isOwner);
+      const result = await ConfigModel.checkCommandPermission(commandName, userRoles, isOwner);
 
       logger.info(`Permission check for ${interaction.user.tag} on command ${commandName}:`, result);
 
@@ -71,9 +69,10 @@ class PermissionChecker {
 
   async getPermissionDetails(interaction, commandName) {
     try {
-      const userRoles = interaction.member?.roles?.cache?.map(role => role.id) || [];
+      const userRoles = interaction.member?.roles?.cache ? 
+        Array.from(interaction.member.roles.cache.keys()) : [];
       const isOwner = interaction.guild?.ownerId === interaction.user.id;
-      const config = await this.configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       const command = config.commands?.[commandName];
 
       return {
@@ -83,7 +82,7 @@ class PermissionChecker {
         isOwner,
         commandConfig: command,
         globalStaffRoles: config.staffRoles,
-        permission: await this.configModel.checkCommandPermission(commandName, userRoles, isOwner)
+        permission: await ConfigModel.checkCommandPermission(commandName, userRoles, isOwner)
       };
     } catch (error) {
       logger.error('Error getting permission details:', error);

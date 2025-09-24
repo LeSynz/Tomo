@@ -30,8 +30,7 @@ module.exports = {
       }
 
       const commandName = interaction.values[0];
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       const command = config.commands[commandName];
 
       if (!command) {

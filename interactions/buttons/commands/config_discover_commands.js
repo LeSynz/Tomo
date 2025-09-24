@@ -11,10 +11,9 @@ module.exports = {
 		try {
 			await interaction.deferUpdate();
 			
-			const configModel = new ConfigModel();
 			
 			logger.info(`🔍 Admin ${interaction.user.tag} requested command discovery`);
-			const discoveredCount = await configModel.discoverAndRegisterCommands(interaction.client, false);
+			const discoveredCount = await ConfigModel.discoverAndRegisterCommands(interaction.client, false);
 			
 			const response = await renderConfigSection('commands', interaction.guild.id);
 			

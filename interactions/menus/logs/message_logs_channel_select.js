@@ -16,8 +16,7 @@ module.exports = {
         });
       }
 
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       
       
       const updatedConfig = {
@@ -26,7 +25,7 @@ module.exports = {
         updatedAt: new Date().toISOString()
       };
       
-      await configModel.setConfig(updatedConfig);
+      await ConfigModel.setConfig(updatedConfig);
       
       await interaction.update({
         embeds: [

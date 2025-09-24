@@ -29,10 +29,9 @@ module.exports = {
         });
       }
 
-      const configModel = new ConfigModel();
       
       try {
-        await configModel.setAppealsChannel(channelId);
+        await ConfigModel.setAppealsChannel(channelId);
         
         logger.info(`Appeals channel set to ${channel.name} (${channelId}) by ${interaction.user.tag}`);
         

@@ -28,13 +28,12 @@ module.exports = {
       }
 
       const commandName = match[1];
-      const configModel = new ConfigModel();
       let successCount = 0;
       let alreadyAdded = [];
 
       for (const roleId of interaction.values) {
         try {
-          await configModel.addCommandWhitelistRole(commandName, roleId);
+          await ConfigModel.addCommandWhitelistRole(commandName, roleId);
           successCount++;
           logger.info(`Added role ${roleId} to whitelist for command ${commandName} by ${interaction.user.tag}`);
         } catch (error) {

@@ -6,13 +6,12 @@ module.exports = {
   customId: 'toggle_appeals_system',
   async execute(interaction) {
     try {
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       
       const currentStatus = config.appealsEnabled !== false;
       const newStatus = !currentStatus;
       
-      await configModel.setAppealsEnabled(newStatus);
+      await ConfigModel.setAppealsEnabled(newStatus);
       
       const statusText = newStatus ? '✅ Enabled' : '❌ Disabled';
       const embed = new EmbedBuilder()

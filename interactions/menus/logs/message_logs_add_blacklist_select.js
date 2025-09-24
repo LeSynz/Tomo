@@ -7,8 +7,7 @@ module.exports = {
     try {
       const selectedChannelIds = interaction.values;
       
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       
       const currentBlacklist = config.messageLogsBlacklist || [];
       const newChannels = selectedChannelIds.filter(id => !currentBlacklist.includes(id));
@@ -34,7 +33,7 @@ module.exports = {
         updatedAt: new Date().toISOString()
       };
       
-      await configModel.setConfig(updatedConfig);
+      await ConfigModel.setConfig(updatedConfig);
       
       const addedChannelsText = newChannels.map(id => `<#${id}>`).join(', ');
       const skippedText = alreadyBlacklisted.length > 0 

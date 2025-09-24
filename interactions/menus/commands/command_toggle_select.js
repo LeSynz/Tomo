@@ -5,17 +5,16 @@ module.exports = {
   customId: 'command_toggle_select',
   async execute(interaction) {
     try {
-      const configModel = new ConfigModel();
       const selectedCommands = interaction.values;
       
       let toggledOn = [];
       let toggledOff = [];
       
       for (const commandName of selectedCommands) {
-        const success = await configModel.toggleCommand(commandName);
+        const success = await ConfigModel.toggleCommand(commandName);
         
         if (success) {
-          const config = await configModel.getConfig();
+          const config = await ConfigModel.getConfig();
           const commandData = config.commands[commandName];
           
           if (commandData && commandData.enabled !== false) {

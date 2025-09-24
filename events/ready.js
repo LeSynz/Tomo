@@ -2,6 +2,9 @@ const { Events, ActivityType } = require('discord.js');
 const logger = require('../utils/logger');
 const ConfigModel = require('../models/ConfigModel');
 
+// Ensure database connection is initialized
+// require('../database/connection');
+
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
@@ -9,8 +12,7 @@ module.exports = {
 		logger.success(`Ready! Logged in as ${client.user.tag}`);
 		logger.info(`Bot is running in ${client.guilds.cache.size} servers`);
 
-		const configModel = new ConfigModel();
-		const commandsAdded = await configModel.discoverAndRegisterCommands(client);
+		const commandsAdded = await ConfigModel.discoverAndRegisterCommands(client);
 		
 		if (commandsAdded > 0) {
 			logger.info(`🎛️ Auto-registered ${commandsAdded} new commands for configuration`);

@@ -32,6 +32,9 @@ client.selectMenus = new Collection();
 
 async function initializeBot() {
 	try {
+		logger.info('Connecting to the database...');
+		require('./database/connection');
+
 		logger.info('Loading commands...');
 		await loadCommands(client);
 

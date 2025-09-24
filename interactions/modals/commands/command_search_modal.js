@@ -7,8 +7,7 @@ module.exports = {
     try {
       const searchQuery = interaction.fields.getTextInputValue('search_query').toLowerCase().trim();
       
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       
       const commands = Object.entries(config.commands);
       

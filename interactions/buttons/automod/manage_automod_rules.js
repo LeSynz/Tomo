@@ -7,8 +7,7 @@ module.exports = {
   
   async execute(interaction) {
     try {
-      const configModel = new ConfigModel();
-      const rules = await configModel.getAutomodRules();
+      const rules = await ConfigModel.getAutomodRules();
 
       if (rules.length === 0) {
         const embed = new EmbedBuilder()

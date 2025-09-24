@@ -22,8 +22,7 @@ module.exports = {
       }
 
       const commandName = match[1];
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       const command = config.commands[commandName];
 
       if (!command || !command.blacklist || command.blacklist.length === 0) {

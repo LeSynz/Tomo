@@ -7,11 +7,10 @@ module.exports = {
   
   async execute(interaction) {
     try {
-      const configModel = new ConfigModel();
-      const currentState = await configModel.isAutomodEnabled();
+      const currentState = await ConfigModel.isAutomodEnabled();
       const newState = !currentState;
       
-      await configModel.setAutomodEnabled(newState);
+      await ConfigModel.setAutomodEnabled(newState);
 
       const embed = new EmbedBuilder()
         .setColor(newState ? 0x00FF00 : 0xFF6B6B)

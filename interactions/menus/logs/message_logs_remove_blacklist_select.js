@@ -7,8 +7,7 @@ module.exports = {
     try {
       const selectedChannelIds = interaction.values;
       
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       
       const currentBlacklist = config.messageLogsBlacklist || [];
       const updatedBlacklist = currentBlacklist.filter(id => !selectedChannelIds.includes(id));
@@ -19,7 +18,7 @@ module.exports = {
         updatedAt: new Date().toISOString()
       };
       
-      await configModel.setConfig(updatedConfig);
+      await ConfigModel.setConfig(updatedConfig);
       
       const removedChannelsText = selectedChannelIds.map(id => {
         const channel = interaction.guild.channels.cache.get(id);

@@ -5,6 +5,7 @@ const ModerationActionModel = require('../../models/ModerationActionModel');
 const ConfigModel = require('../../models/ConfigModel');
 const { processBanEmbedTemplate } = require('../../utils/templateProcessor');
 
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('ban')
@@ -128,10 +129,9 @@ module.exports = {
         reason: reason
       });
 
-      const configModel = new ConfigModel();
-      const appealInvite = await configModel.getAppealInvite();
-      const appealsEnabled = await configModel.isAppealsEnabled();
-      const banTemplate = await configModel.getBanEmbedTemplate();
+      const appealInvite = await ConfigModel.getAppealInvite();
+      const appealsEnabled = await ConfigModel.isAppealsEnabled();
+      const banTemplate = await ConfigModel.getBanEmbedTemplate();
       
       const processedTemplate = processBanEmbedTemplate(banTemplate, {
         user: targetUser,

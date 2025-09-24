@@ -28,13 +28,12 @@ module.exports = {
       }
 
       const commandName = match[1];
-      const configModel = new ConfigModel();
       let successCount = 0;
       let failed = [];
 
       for (const roleId of interaction.values) {
         try {
-          await configModel.removeCommandWhitelistRole(commandName, roleId);
+          await ConfigModel.removeCommandWhitelistRole(commandName, roleId);
           successCount++;
           logger.info(`Removed role ${roleId} from whitelist for command ${commandName} by ${interaction.user.tag}`);
         } catch (error) {

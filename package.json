@@ -23,7 +23,8 @@
     "discord.js": "^14.22.1",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
-    "express-rate-limit": "^8.1.0"
+    "express-rate-limit": "^8.1.0",
+    "synz-db": "^1.2.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

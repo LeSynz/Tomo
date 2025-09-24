@@ -130,13 +130,12 @@ module.exports = {
         caseId: dbAction.caseId
       });
 
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       if (config.automodEnabled) {
         const userWarnings = await ModerationActionModel.getUserWarnings(targetUser.id, interaction.guild.id);
         const warningCount = userWarnings.length;
         
-        const automodAction = await configModel.getAutomodActionForWarnings(warningCount);
+        const automodAction = await ConfigModel.getAutomodActionForWarnings(warningCount);
         if (automodAction) {
           try {
             let automodDbAction = null;

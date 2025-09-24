@@ -68,8 +68,7 @@ module.exports = {
         }
       }
 
-      const configModel = new ConfigModel();
-      await configModel.addAutomodRule(threshold, action, duration);
+      await ConfigModel.addAutomodRule(threshold, action, duration);
 
       const actionText = action === 'mute' ? `Mute for ${duration}` : action === 'kick' ? 'Kick' : 'Ban';
       

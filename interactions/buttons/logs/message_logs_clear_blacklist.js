@@ -5,8 +5,7 @@ module.exports = {
   customId: 'message_logs_clear_blacklist',
   async execute(interaction) {
     try {
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       
       const blacklistedChannels = config.messageLogsBlacklist || [];
       
@@ -29,7 +28,7 @@ module.exports = {
         updatedAt: new Date().toISOString()
       };
       
-      await configModel.setConfig(updatedConfig);
+      await ConfigModel.setConfig(updatedConfig);
       
       await interaction.reply({
         embeds: [

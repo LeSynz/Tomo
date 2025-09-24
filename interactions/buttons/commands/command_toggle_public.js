@@ -22,8 +22,7 @@ module.exports = {
       }
 
       const commandName = match[1];
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       const command = config.commands[commandName];
 
       if (!command) {
@@ -36,9 +35,9 @@ module.exports = {
       const currentPublicStatus = command.public === true;
       const newPublicStatus = !currentPublicStatus;
 
-      await configModel.setCommandPublic(commandName, newPublicStatus);
+      await ConfigModel.setCommandPublic(commandName, newPublicStatus);
       
-      const updatedConfig = await configModel.getConfig();
+      const updatedConfig = await ConfigModel.getConfig();
       const commandData = updatedConfig.commands[commandName];
 
       logger.info(`User ${interaction.user.tag} toggled public status for command ${commandName}: ${newPublicStatus}`);

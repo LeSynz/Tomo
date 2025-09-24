@@ -5,8 +5,7 @@ module.exports = {
   customId: 'config_commands_back_to_list',
   async execute(interaction) {
     try {
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       
       const commands = Object.entries(config.commands);
       const itemsPerPage = 20;

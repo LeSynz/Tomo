@@ -22,8 +22,7 @@ module.exports = {
       }
 
       const commandName = match[1];
-      const configModel = new ConfigModel();
-      const config = await configModel.getConfig();
+      const config = await ConfigModel.getConfig();
       const commandData = config.commands[commandName];
 
       if (!commandData) {
@@ -36,9 +35,9 @@ module.exports = {
       const currentState = commandData.enabled !== false;
       const newState = !currentState;
       
-      await configModel.setCommandEnabled(commandName, newState);
+      await ConfigModel.setCommandEnabled(commandName, newState);
       
-      const updatedConfig = await configModel.getConfig();
+      const updatedConfig = await ConfigModel.getConfig();
       const updatedCommandData = updatedConfig.commands[commandName];
 
       logger.info(`Command ${commandName} toggled to ${newState ? 'enabled' : 'disabled'} by ${interaction.user.tag}`);

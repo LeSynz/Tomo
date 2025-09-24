@@ -20,14 +20,13 @@ module.exports = {
         });
       }
 
-      const configModel = new ConfigModel();
       let successCount = 0;
       let invalidRoles = [];
 
       for (const roleId of interaction.values) {
         if (interaction.guild.roles.cache.has(roleId)) {
           try {
-            await configModel.setStaffRole(roleId, true);
+            await ConfigModel.setStaffRole(roleId, true);
             successCount++;
             logger.info(`Added staff role ${roleId} by ${interaction.user.tag}`);
           } catch (error) {
