@@ -2,13 +2,14 @@ const { Events } = require('discord.js');
 const { handleButtonInteraction } = require('../handlers/buttonHandler');
 const { handleModalInteraction } = require('../handlers/modalHandler');
 const { handleSelectMenuInteraction } = require('../handlers/selectMenuHandler');
+const { handleAutocomplete } = require('../handlers/autocompleteHandler');
 const logger = require('../utils/logger');
 
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
 		logger.info(`Interaction received: Type=${interaction.type}, CustomId=${interaction.customId || 'N/A'}, User=${interaction.user.tag}`);
-		
+
 		if (interaction.isChatInputCommand()) {
 			const command = interaction.client.commands.get(
 				interaction.commandName
@@ -61,22 +62,7 @@ module.exports = {
 			await handleModalInteraction(interaction);
 		}
 		else if (interaction.isAutocomplete()) {
-			const command = interaction.client.commands.get(
-				interaction.commandName
-			);
-
-			if (!command || !command.autocomplete) {
-				return;
-			}
-
-			try {
-				await command.autocomplete(interaction);
-			} catch (error) {
-				logger.error(
-					`Error executing autocomplete for ${interaction.commandName}:`,
-					error
-				);
-			}
+			await handleAutocomplete(interaction, interaction.client);
 		}
 		else {
 			logger.warn(`Unhandled interaction type: ${interaction.type}, CustomId: ${interaction.customId || 'N/A'}`);
